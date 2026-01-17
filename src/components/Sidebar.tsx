@@ -42,11 +42,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     <>
       {/* Logo */}
       <div className="p-6 border-b border-border/50">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => {
+            onNavigate('dashboard');
+            setMobileOpen(false);
+          }}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
             <GraduationCap className="w-5 h-5 text-primary-foreground" />
           </div>
-          <div>
+          <div className="text-left">
             <h2 className="font-bold text-lg">{t('auth.title')}</h2>
             {profile?.full_name && (
               <p className="text-xs text-muted-foreground truncate max-w-[140px]">
@@ -54,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
               </p>
             )}
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Navigation */}
@@ -99,12 +105,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-b border-border/50 z-50 flex items-center justify-between px-4">
-        <div className="flex items-center gap-3">
+        <button
+          onClick={() => onNavigate('dashboard')}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
             <GraduationCap className="w-4 h-4 text-primary-foreground" />
           </div>
           <h2 className="font-bold">{t('auth.title')}</h2>
-        </div>
+        </button>
         <Button
           variant="ghost"
           size="icon"
