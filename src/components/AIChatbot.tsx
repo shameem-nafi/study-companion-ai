@@ -165,14 +165,14 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+            initial={{ opacity: 0, y: 100, scale: 0.85, rotate: 5 }}
             animate={{
               opacity: 1,
               y: 0,
               scale: 1,
               height: isMinimized ? 'auto' : '500px',
             }}
-            exit={{ opacity: 0, y: 100, scale: 0.9 }}
+            exit={{ opacity: 0, y: 100, scale: 0.85, rotate: -5 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed bottom-6 right-6 w-[360px] max-w-[calc(100vw-48px)] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col"
           >
@@ -234,9 +234,11 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
                         {quickPrompts.map((prompt, i) => (
                           <motion.button
                             key={i}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            initial={{ opacity: 0, y: 15, scale: 0.9 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ delay: i * 0.1, type: 'spring', damping: 20, stiffness: 300 }}
+                            whileHover={{ scale: 1.02, x: 4 }}
+                            whileTap={{ scale: 0.96 }}
                             onClick={() => streamChat(prompt)}
                             disabled={isLoading}
                             className="w-full text-left p-3 rounded-xl bg-muted hover:bg-accent text-sm transition-colors disabled:opacity-50"
@@ -251,8 +253,10 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
                       {messages.map((msg, i) => (
                         <motion.div
                           key={i}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
+                          initial={{ opacity: 0, y: 10, x: msg.role === 'user' ? 20 : -20 }}
+                          animate={{ opacity: 1, y: 0, x: 0 }}
+                          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                          whileHover={{ scale: 1.01 }}
                           className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                         >
                           <div

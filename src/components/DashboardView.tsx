@@ -167,13 +167,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         {statCards.map((stat, index) => (
           <motion.div
             key={stat.label}
-            variants={itemVariants}
-            whileHover={{ scale: 1.02 }}
-            className="glass-card p-6 rounded-2xl"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: index * 0.1, type: 'spring', damping: 25, stiffness: 300 }}
+            whileHover={{ scale: 1.05, y: -5 }}
+            whileTap={{ scale: 0.98 }}
+            className="glass-card p-6 rounded-2xl cursor-pointer"
           >
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4`}>
+            <motion.div
+              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4`}
+              whileHover={{ rotate: 12, scale: 1.1 }}
+            >
               <stat.icon className="w-6 h-6 text-white" />
-            </div>
+            </motion.div>
             <p className="text-2xl font-bold">{stat.value}</p>
             <p className="text-sm text-muted-foreground">{stat.label}</p>
           </motion.div>

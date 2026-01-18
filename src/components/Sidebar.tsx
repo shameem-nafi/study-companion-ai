@@ -76,11 +76,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navItems.map((item) => (
+        {navItems.map((item, idx) => (
           <motion.button
             key={item.id}
-            whileHover={{ x: 4 }}
-            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.05, type: 'spring', damping: 20, stiffness: 300 }}
+            whileHover={{ x: 6, scale: 1.01 }}
+            whileTap={{ scale: 0.96 }}
             onClick={() => {
               onNavigate(item.id);
               setMobileOpen(false);
@@ -91,7 +94,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
                 : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
-            <item.icon className="w-5 h-5" />
+            <motion.div whileHover={{ rotate: 12 }}>
+              <item.icon className="w-5 h-5" />
+            </motion.div>
             {item.label}
           </motion.button>
         ))}

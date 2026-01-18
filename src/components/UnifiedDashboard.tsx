@@ -516,12 +516,17 @@ export const UnifiedDashboard: React.FC = () => {
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.08 } },
+    show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    show: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { type: 'spring', damping: 25, stiffness: 300 }
+    },
   };
 
   if (loading) {
@@ -569,15 +574,20 @@ export const UnifiedDashboard: React.FC = () => {
           <AnimatePresence>
             {showSearchResults && searchResults.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -15, scale: 0.95 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                 className="absolute left-0 right-0 top-full mt-2 z-50 bg-card border border-border rounded-xl shadow-xl overflow-hidden"
               >
                 <ScrollArea className="max-h-80">
-                  {searchResults.map((result) => (
-                    <button
+                  {searchResults.map((result, idx) => (
+                    <motion.button
                       key={`${result.type}-${result.id}`}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.03 }}
+                      whileHover={{ x: 4 }}
                       onClick={() => handleSearchSelect(result)}
                       className="w-full p-4 text-left hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
                     >
@@ -603,7 +613,7 @@ export const UnifiedDashboard: React.FC = () => {
                           {result.type}
                         </Badge>
                       </div>
-                    </button>
+                    </motion.button>
                   ))}
                 </ScrollArea>
               </motion.div>
@@ -678,7 +688,13 @@ export const UnifiedDashboard: React.FC = () => {
                 departments.map((dept) => (
                   <motion.div
                     key={dept.id}
-                    whileHover={{ scale: 1.01 }}
+                    layout
+                    whileHover={{ scale: 1.02, x: 4 }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                     onClick={() => {
                       setSelectedDeptId(dept.id);
                       setSelectedCourseId(null);
