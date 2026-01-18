@@ -22,6 +22,7 @@ import {
   Search,
   X,
   ChevronRight,
+  FolderPlus,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +34,12 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -1102,29 +1109,101 @@ export const UnifiedDashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating Action Buttons */}
+      {/* Perfect Quick-Action Buttons Dock */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-6 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-8 z-40"
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        className="fixed bottom-8 right-8 z-40"
       >
-        <div className="flex items-center gap-2 p-2 rounded-2xl glass-card shadow-xl">
-          <Button
-            onClick={() => { setDeptDialog(true); setFormData({}); setEditingItem(null); }}
-            className="gap-2 bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white border-0"
+        <TooltipProvider>
+          <motion.div 
+            className="flex flex-col lg:flex-row items-center gap-3 p-3 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-2xl"
+            whileHover={{ scale: 1.02 }}
           >
-            <Building2 className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('departments.add')}</span>
-          </Button>
-          <Button
-            onClick={() => { setCourseDialog(true); setFormData({}); setEditingItem(null); setSelectedDept(selectedDeptId || ''); }}
-            disabled={departments.length === 0}
-            className="gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('courses.add')}</span>
-          </Button>
-        </div>
+            {/* Add Department Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div
+                  whileHover={{ y: -5, scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    onClick={() => { 
+                      setDeptDialog(true); 
+                      setFormData({}); 
+                      setEditingItem(null); 
+                    }}
+                    className="gap-2 px-6 py-2 h-auto bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-600 hover:from-purple-600 hover:via-purple-700 hover:to-indigo-700 text-white border-0 font-semibold shadow-lg hover:shadow-purple-500/50 transition-all"
+                  >
+                    <FolderPlus className="w-5 h-5" />
+                    <span className="hidden sm:inline">{t('departments.add')}</span>
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white border-0">
+                <p className="font-medium">{t('departments.add')}</p>
+                <p className="text-xs text-purple-100">Organize your studies</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Add Course Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div
+                  whileHover={{ y: -5, scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    onClick={() => { 
+                      setCourseDialog(true); 
+                      setFormData({}); 
+                      setEditingItem(null); 
+                      setSelectedDept(selectedDeptId || ''); 
+                    }}
+                    disabled={departments.length === 0}
+                    className="gap-2 px-6 py-2 h-auto bg-gradient-to-br from-blue-500 via-blue-600 to-sky-600 hover:from-blue-600 hover:via-blue-700 hover:to-sky-700 text-white border-0 font-semibold shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    <span className="hidden sm:inline">{t('courses.add')}</span>
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-gradient-to-r from-blue-600 to-sky-600 text-white border-0">
+                <p className="font-medium">{t('courses.add')}</p>
+                <p className="text-xs text-blue-100">Add a new course</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Add Topic Button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <motion.div
+                  whileHover={{ y: -5, scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button
+                    onClick={() => { 
+                      setTopicDialog(true); 
+                      setFormData({}); 
+                      setEditingItem(null); 
+                      setSelectedCourse(selectedCourseId || ''); 
+                    }}
+                    disabled={departments.flatMap(d => d.courses || []).length === 0}
+                    className="gap-2 px-6 py-2 h-auto bg-gradient-to-br from-emerald-500 via-green-600 to-teal-600 hover:from-emerald-600 hover:via-green-700 hover:to-teal-700 text-white border-0 font-semibold shadow-lg hover:shadow-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  >
+                    <Plus className="w-5 h-5" />
+                    <span className="hidden sm:inline">{t('topics.add')}</span>
+                  </Button>
+                </motion.div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0">
+                <p className="font-medium">{t('topics.add')}</p>
+                <p className="text-xs text-emerald-100">Create a learning topic</p>
+              </TooltipContent>
+            </Tooltip>
+          </motion.div>
+        </TooltipProvider>
       </motion.div>
 
       {/* Department Dialog */}
