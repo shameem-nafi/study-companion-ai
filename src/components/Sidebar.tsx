@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   GraduationCap,
+  MessageCircle,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { GlobalSettings } from '@/components/GlobalSettings';
@@ -19,9 +20,10 @@ import { useState } from 'react';
 interface SidebarProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  onToggleChatbot?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onToggleChatbot }) => {
   const { t } = useTranslation();
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
@@ -41,18 +43,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
   const NavContent = () => (
     <>
       {/* Logo */}
-      <div className="p-6 border-b border-border/50">
+      <div className="p-6 border-b border-border/50 flex items-center justify-between gap-3">
         <button
           onClick={() => {
             onNavigate('dashboard');
             setMobileOpen(false);
           }}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer flex-1 min-w-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center flex-shrink-0">
             <GraduationCap className="w-5 h-5 text-primary-foreground" />
           </div>
-          <div className="text-left">
+          <div className="text-left min-w-0">
             <h2 className="font-bold text-lg">{t('auth.title')}</h2>
             {profile?.full_name && (
               <p className="text-xs text-muted-foreground truncate max-w-[140px]">
@@ -61,6 +63,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
             )}
           </div>
         </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleChatbot}
+          className="hidden lg:flex bg-primary hover:bg-primary/80 text-primary-foreground rounded-xl h-9 w-9 flex-shrink-0"
+          title={t('chatbot.title')}
+        >
+          <MessageCircle className="w-5 h-5" />
+        </Button>
       </div>
 
       {/* Navigation */}
@@ -105,22 +116,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-b border-border/50 z-50 flex items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleChatbot}
+            className="bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg gap-2"
+          >
+            <MessageCircle className="w-4 h-4" />
+            <span className="text-sm">{t('chatbot.title')}</span>
+          </Button>
+        </div>
         <button
           onClick={() => onNavigate('dashboard')}
-          className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+          className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
             <GraduationCap className="w-4 h-4 text-primary-foreground" />
           </div>
           <h2 className="font-bold">{t('auth.title')}</h2>
         </button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </Button>
       </div>
 
       {/* Mobile Sidebar */}

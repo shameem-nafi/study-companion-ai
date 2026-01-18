@@ -152,6 +152,10 @@ export const translations = {
         english: "English",
         bangla: "বাংলা",
       },
+      // ChatBot
+      chatbot: {
+        title: "AI ChatBot",
+      },
       // Footer
       footer: {
         developedBy: "Developed by",
@@ -323,6 +327,10 @@ export const translations = {
         language: "ভাষা",
         english: "English",
         bangla: "বাংলা",
+      },
+      // ChatBot
+      chatbot: {
+        title: "AI চ্যাটবট",
       },
       // Footer
       footer: {

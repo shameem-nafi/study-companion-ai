@@ -23,9 +23,13 @@ interface Message {
   content: string;
 }
 
+export interface AIChatbotHandle {
+  open: () => void;
+}
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`;
 
-export const AIChatbot: React.FC = () => {
+export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const { profile } = useAuth();
@@ -36,6 +40,10 @@ export const AIChatbot: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  React.useImperativeHandle(ref, () => ({
+    open: () => setIsOpen(true),
+  }));
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -153,24 +161,6 @@ export const AIChatbot: React.FC = () => {
 
   return (
     <>
-      {/* Chat Toggle Button */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg flex items-center justify-center z-50"
-          >
-            <MessageCircle className="w-6 h-6" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-background animate-pulse" />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
@@ -333,4 +323,6 @@ export const AIChatbot: React.FC = () => {
       </AnimatePresence>
     </>
   );
-};
+});
+
+AIChatbot.displayName = 'AIChatbot';

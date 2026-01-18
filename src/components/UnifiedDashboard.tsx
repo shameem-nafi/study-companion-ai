@@ -1124,14 +1124,6 @@ export const UnifiedDashboard: React.FC = () => {
             <BookOpen className="w-4 h-4" />
             <span className="hidden sm:inline">{t('courses.add')}</span>
           </Button>
-          <Button
-            onClick={() => { setTopicDialog(true); setFormData({}); setEditingItem(null); setSelectedCourse(selectedCourseId || ''); }}
-            disabled={departments.flatMap(d => d.courses || []).length === 0}
-            className="gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white border-0"
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('topics.add')}</span>
-          </Button>
         </div>
       </motion.div>
 
