@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -278,13 +279,19 @@ export const AIChatbot: React.FC = () => {
                             )}
                           </div>
                           <div
-                            className={`flex-1 p-3 rounded-xl text-sm ${
+                            className={`flex-1 p-3 rounded-xl text-sm max-w-[280px] overflow-hidden ${
                               msg.role === 'user'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted'
                             }`}
                           >
-                            {msg.content || (
+                            {msg.content ? (
+                              msg.role === 'assistant' ? (
+                                <MarkdownRenderer content={msg.content} />
+                              ) : (
+                                msg.content
+                              )
+                            ) : (
                               <span className="flex items-center gap-2 text-muted-foreground">
                                 <Loader2 className="w-4 h-4 animate-spin" />
                                 {i18n.language === 'bn' ? 'চিন্তা করছি...' : 'Thinking...'}
