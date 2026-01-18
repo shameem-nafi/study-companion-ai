@@ -1,73 +1,132 @@
-# Welcome to your Lovable project
+# Study Companion AI - Your Personalized Study Organizer
 
-## Project info
+Study Companion AI is an intelligent study organization platform that helps students manage their academic workload with AI-powered assistance. Track topics, courses, and revisions with spaced repetition scheduling.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Features
 
-## How can I edit this code?
+- 📚 **Hierarchical Organization**: Organize your studies into departments, courses, and topics
+- 🤖 **AI Study Assistant**: Chat with an AI-powered assistant for study help and explanations
+- ✅ **Progress Tracking**: Monitor completion status and revision schedules
+- 🔄 **Spaced Repetition**: Intelligent revision scheduling based on learning science principles
+- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
+- 🌙 **Dark Mode**: Easy on the eyes with built-in dark mode support
+- 🌍 **Multi-language**: Support for English and Bengali
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- Node.js & npm installed ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd study-companion-ai
 
-# Step 3: Install the necessary dependencies.
+# Step 3: Install dependencies
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will open at `http://localhost:5173`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Building for Production
 
-**Use GitHub Codespaces**
+```sh
+npm run build
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies Used
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Vite** - Fast build tool and dev server
+- **TypeScript** - Type-safe JavaScript
+- **React** - UI framework
+- **shadcn-ui** - High-quality UI components
+- **Tailwind CSS** - Utility-first CSS framework
+- **Supabase** - Backend and authentication
+- **React Router** - Client-side routing
+- **Framer Motion** - Smooth animations
+- **i18next** - Internationalization
 
-## How can I deploy this project?
+## How to Edit
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Local Development with IDE
 
-## Can I connect a custom domain to my Lovable project?
+Clone the repository and edit files in your preferred IDE:
 
-Yes, you can!
+```sh
+git clone <YOUR_GIT_URL>
+cd study-companion-ai
+npm install
+npm run dev
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Edit on GitHub
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Navigate to the desired file(s)
+- Click the "Edit" button (pencil icon) at the top right
+- Make your changes and commit
+
+### Use GitHub Codespaces
+
+- Click the "Code" button (green) on the repository
+- Select the "Codespaces" tab
+- Click "New codespace"
+- Edit files and commit changes
+
+## Deployment
+
+### Deploy to Vercel
+
+The cleanest way to deploy is using Vercel:
+
+1. Push your code to GitHub
+2. Import the repository at [vercel.com](https://vercel.com)
+3. Vercel will auto-detect it as a Vite React app
+4. Set environment variables (Supabase keys)
+5. Click Deploy
+
+### Deploy to Other Platforms
+
+This is a standard React + Vite application and can be deployed to:
+
+- **Netlify** - Connect your GitHub repo and deploy automatically
+- **GitHub Pages** - Use `npm run build` and deploy the `dist` folder
+- **Traditional Hosting** - Build the project and serve the `dist` folder
+
+## Environment Variables
+
+Create a `.env.local` file with:
+
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_key
+```
+
+## Contributing
+
+Contributions are welcome! Feel free to:
+- Report bugs
+- Suggest features
+- Submit pull requests
+
+## License
+
+This project is open source.
+
+## Support
+
+For issues, questions, or feedback, please open a GitHub issue.
+
+---
+
+**Built with ❤️ for students and learners everywhere**
+
