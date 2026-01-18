@@ -11,6 +11,7 @@ import {
   X,
   GraduationCap,
   MessageCircle,
+  User,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { GlobalSettings } from '@/components/GlobalSettings';
@@ -35,9 +36,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
   };
 
   const navItems = [
-    { id: 'dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
-    { id: 'departments', label: t('departments.title'), icon: Building2 },
-    { id: 'revisions', label: t('revisions.title'), icon: RefreshCw },
+    { id: 'dashboard', label: t('dashboard.title'), icon: LayoutDashboard, route: '/dashboard' },
+    { id: 'departments', label: t('departments.title'), icon: Building2, route: '/departments' },
+    { id: 'revisions', label: t('revisions.title'), icon: RefreshCw, route: '/revisions' },
   ];
 
   const NavContent = () => (
@@ -85,6 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
             whileHover={{ x: 6, scale: 1.01 }}
             whileTap={{ scale: 0.96 }}
             onClick={() => {
+              navigate(item.route);
               onNavigate(item.id);
               setMobileOpen(false);
             }}
@@ -105,6 +107,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
       {/* Bottom section */}
       <div className="p-4 border-t border-border/50 space-y-4">
         <GlobalSettings />
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent"
+          onClick={() => navigate('/profile')}
+        >
+          <User className="w-4 h-4 mr-2" />
+          My Profile
+        </Button>
         <Button
           variant="ghost"
           className="w-full justify-start text-muted-foreground hover:text-destructive"
