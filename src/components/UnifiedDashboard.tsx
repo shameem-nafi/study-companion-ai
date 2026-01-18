@@ -151,6 +151,7 @@ export const UnifiedDashboard: React.FC = () => {
   const [topicDialog, setTopicDialog] = useState(false);
   const [resourceDialog, setResourceDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<{ type: string; id: string; name: string } | null>(null);
+  const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
   // Form states
   const [editingItem, setEditingItem] = useState<any>(null);
@@ -542,10 +543,10 @@ export const UnifiedDashboard: React.FC = () => {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6 pb-24">
-      {/* Global Search Bar */}
-      <motion.div variants={itemVariants} className="relative">
-        <div className="glass-card rounded-2xl p-4">
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6 pb-32 lg:pb-24">
+      {/* Global Search Bar - Sticky on Mobile */}
+      <motion.div variants={itemVariants} className="relative lg:static">
+        <div className="glass-card rounded-2xl p-4 lg:rounded-2xl sticky top-16 lg:top-auto z-30 lg:z-auto">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
@@ -633,8 +634,8 @@ export const UnifiedDashboard: React.FC = () => {
         <Progress value={progressPercentage} className="h-3" />
       </motion.div>
 
-      {/* Stats Grid */}
-      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      {/* Stats Grid - 2x3 on mobile, 5 columns on desktop */}
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-3">
         {[
           { label: t('departments.title'), value: stats.totalDepartments, icon: Building2, color: 'from-purple-500 to-violet-500' },
           { label: t('courses.title'), value: stats.totalCourses, icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
@@ -1109,16 +1110,16 @@ export const UnifiedDashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Perfect Quick-Action Buttons Dock */}
+      {/* Desktop Quick-Action Buttons Dock */}
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-        className="fixed bottom-8 right-8 z-40"
+        className="hidden lg:flex fixed bottom-8 right-8 z-40"
       >
         <TooltipProvider>
           <motion.div 
-            className="flex flex-col lg:flex-row items-center gap-3 p-3 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-2xl"
+            className="flex items-center gap-3 p-3 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/20 dark:border-white/10 shadow-2xl"
             whileHover={{ scale: 1.02 }}
           >
             {/* Add Department Button */}
@@ -1204,6 +1205,109 @@ export const UnifiedDashboard: React.FC = () => {
             </Tooltip>
           </motion.div>
         </TooltipProvider>
+      </motion.div>
+
+      {/* Mobile Speed Dial FAB */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+        className="lg:hidden fixed bottom-8 right-8 z-40"
+      >
+        <AnimatePresence>
+          {/* Speed Dial Sub-buttons */}
+          {speedDialOpen && (
+            <>
+              {/* Add Topic Button */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0, y: 20 }}
+                transition={{ delay: 0.05 }}
+                className="absolute bottom-20 right-0"
+              >
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { 
+                    setTopicDialog(true); 
+                    setFormData({}); 
+                    setEditingItem(null); 
+                    setSelectedCourse(selectedCourseId || ''); 
+                    setSpeedDialOpen(false);
+                  }}
+                  disabled={departments.flatMap(d => d.courses || []).length === 0}
+                  className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg hover:shadow-emerald-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span className="text-sm font-semibold">{t('topics.add')}</span>
+                </motion.button>
+              </motion.div>
+
+              {/* Add Course Button */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0, y: 20 }}
+                transition={{ delay: 0.1 }}
+                className="absolute bottom-32 right-0"
+              >
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { 
+                    setCourseDialog(true); 
+                    setFormData({}); 
+                    setEditingItem(null); 
+                    setSelectedDept(selectedDeptId || ''); 
+                    setSpeedDialOpen(false);
+                  }}
+                  disabled={departments.length === 0}
+                  className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-br from-blue-500 to-sky-600 text-white shadow-lg hover:shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  <span className="text-sm font-semibold">{t('courses.add')}</span>
+                </motion.button>
+              </motion.div>
+
+              {/* Add Department Button */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0, y: 20 }}
+                transition={{ delay: 0.15 }}
+                className="absolute bottom-44 right-0"
+              >
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => { 
+                    setDeptDialog(true); 
+                    setFormData({}); 
+                    setEditingItem(null); 
+                    setSpeedDialOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white shadow-lg hover:shadow-purple-500/50 transition-all"
+                >
+                  <FolderPlus className="w-5 h-5" />
+                  <span className="text-sm font-semibold">{t('departments.add')}</span>
+                </motion.button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
+        {/* Main FAB Button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setSpeedDialOpen(!speedDialOpen)}
+          className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-white shadow-2xl flex items-center justify-center font-bold text-2xl hover:shadow-primary/50 transition-all"
+        >
+          <motion.div
+            animate={{ rotate: speedDialOpen ? 45 : 0 }}
+            transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+          >
+            +
+          </motion.div>
+        </motion.button>
       </motion.div>
 
       {/* Department Dialog */}
