@@ -59,7 +59,7 @@ export const CompleteProfileForm: React.FC = () => {
         description: 'Profile completed successfully!',
       });
       
-      navigate('/dashboard');
+      navigate('/home');
     } catch (error) {
       toast({
         title: t('common.error'),

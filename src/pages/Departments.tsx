@@ -32,6 +32,12 @@ const Departments: React.FC = () => {
     chatbotRef.current?.open();
   };
 
+  const handleNavigate = (page: string) => {
+    if (page === 'dashboard') navigate('/dashboard');
+    else if (page === 'departments') navigate('/departments');
+    else if (page === 'revisions') navigate('/revisions');
+  };
+
   const departments = [
     {
       id: 1,
@@ -114,7 +120,7 @@ const Departments: React.FC = () => {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-blue-50 via-white to-purple-50'}`}>
-      <Sidebar currentPage="departments" onNavigate={() => {}} onToggleChatbot={handleToggleChatbot} />
+      <Sidebar currentPage="departments" onNavigate={handleNavigate} onToggleChatbot={handleToggleChatbot} />
 
       <main className="lg:ml-64 min-h-screen pt-20 lg:pt-0">
         <div className="p-6 lg:p-8 max-w-6xl mx-auto">

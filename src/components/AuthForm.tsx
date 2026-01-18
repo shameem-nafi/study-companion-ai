@@ -67,7 +67,7 @@ export const AuthForm: React.FC = () => {
             variant: 'destructive',
           });
         } else {
-          navigate('/dashboard');
+          navigate('/home');
         }
       } else {
         const { error } = await signUp(email, password);
