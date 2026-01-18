@@ -85,3 +85,18 @@
     @apply bg-popover/95 backdrop-blur-xl border border-border/50;
   }
 }
+
+/* Hide any injected Lovable branding overlays and elements */
+[class*='lovable'],
+[id*='lovable'],
+.lovable-badge,
+#lovable-badge,
+[data-lovable],
+.lovable-heart,
+.lovable-logo,
+.lovable-watermark {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
