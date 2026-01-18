@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,8 +8,6 @@ import {
   CheckCircle2,
   RefreshCw,
   Plus,
-  ChevronRight,
-  ChevronDown,
   Trash2,
   Edit3,
   Loader2,
@@ -21,6 +19,9 @@ import {
   FileUp,
   StickyNote,
   ExternalLink,
+  Search,
+  X,
+  ChevronRight,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +32,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -48,11 +50,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -60,7 +57,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 
 interface Department {
   id: string;
@@ -106,6 +103,16 @@ interface Stats {
   pendingRevisions: number;
 }
 
+interface SearchResult {
+  type: 'course' | 'topic';
+  id: string;
+  name: string;
+  departmentId: string;
+  departmentName: string;
+  courseId?: string;
+  courseName?: string;
+}
+
 export const UnifiedDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
@@ -120,9 +127,16 @@ export const UnifiedDashboard: React.FC = () => {
     pendingRevisions: 0,
   });
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
-  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
-  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
+  
+  // Selection states for hierarchical navigation
+  const [selectedDeptId, setSelectedDeptId] = useState<string | null>(null);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Dialog states
   const [deptDialog, setDeptDialog] = useState(false);
@@ -202,31 +216,114 @@ export const UnifiedDashboard: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  const toggleDept = (id: string) => {
-    setExpandedDepts((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+  // Search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const results: SearchResult[] = [];
+
+    departments.forEach((dept) => {
+      dept.courses?.forEach((course) => {
+        if (course.name.toLowerCase().includes(query) || course.code?.toLowerCase().includes(query)) {
+          results.push({
+            type: 'course',
+            id: course.id,
+            name: course.name,
+            departmentId: dept.id,
+            departmentName: dept.name,
+          });
+        }
+        course.topics?.forEach((topic) => {
+          if (topic.name.toLowerCase().includes(query) || topic.description?.toLowerCase().includes(query)) {
+            results.push({
+              type: 'topic',
+              id: topic.id,
+              name: topic.name,
+              departmentId: dept.id,
+              departmentName: dept.name,
+              courseId: course.id,
+              courseName: course.name,
+            });
+          }
+        });
+      });
     });
+
+    setSearchResults(results.slice(0, 10));
+    setShowSearchResults(true);
+  }, [searchQuery, departments]);
+
+  const handleSearchSelect = (result: SearchResult) => {
+    setSelectedDeptId(result.departmentId);
+    if (result.type === 'course') {
+      setSelectedCourseId(result.id);
+      setSelectedTopicId(null);
+    } else {
+      setSelectedCourseId(result.courseId!);
+      setSelectedTopicId(result.id);
+    }
+    setSearchQuery('');
+    setShowSearchResults(false);
   };
 
-  const toggleCourse = (id: string) => {
-    setExpandedCourses((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  // Get selected items
+  const selectedDepartment = useMemo(() => 
+    departments.find(d => d.id === selectedDeptId), 
+    [departments, selectedDeptId]
+  );
+  
+  const selectedCourseData = useMemo(() => 
+    selectedDepartment?.courses?.find(c => c.id === selectedCourseId),
+    [selectedDepartment, selectedCourseId]
+  );
 
-  const toggleTopic = (id: string) => {
-    setExpandedTopics((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const selectedTopicData = useMemo(() =>
+    selectedCourseData?.topics?.find(t => t.id === selectedTopicId),
+    [selectedCourseData, selectedTopicId]
+  );
+
+  // Get revision info text
+  const getRevisionInfo = (topic: Topic) => {
+    const revisionDays = [3, 7, 21, 60];
+    const currentRevision = topic.revision_count || 0;
+    const remainingRevisions = Math.max(0, 4 - currentRevision);
+    
+    if (!topic.completed) {
+      return { status: 'pending', text: 'Not yet completed' };
+    }
+    
+    if (currentRevision === 0) {
+      return { status: 'pending', text: 'No revisions yet' };
+    }
+
+    if (currentRevision >= 4) {
+      return { status: 'complete', text: 'All revisions complete!' };
+    }
+
+    let nextRevisionText = '';
+    if (topic.last_revision_at) {
+      const lastRevision = new Date(topic.last_revision_at);
+      const nextRevisionDays = revisionDays[currentRevision];
+      const nextRevisionDate = new Date(lastRevision);
+      nextRevisionDate.setDate(nextRevisionDate.getDate() + nextRevisionDays);
+      const daysUntil = differenceInDays(nextRevisionDate, new Date());
+      
+      if (daysUntil <= 0) {
+        nextRevisionText = ` • Revision due!`;
+      } else {
+        nextRevisionText = ` • Next in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+      }
+    }
+
+    return { 
+      status: 'progress', 
+      text: `Revised ${currentRevision} time${currentRevision > 1 ? 's' : ''} • ${remainingRevisions} remaining${nextRevisionText}`
+    };
   };
 
   // CRUD operations
@@ -362,6 +459,19 @@ export const UnifiedDashboard: React.FC = () => {
     try {
       await supabase.from(deleteDialog.type === 'department' ? 'departments' : deleteDialog.type === 'course' ? 'courses' : deleteDialog.type === 'topic' ? 'topics' : 'resources').delete().eq('id', deleteDialog.id);
       toast({ title: t('common.success'), description: `${deleteDialog.type} deleted!` });
+      
+      // Reset selection if deleted item was selected
+      if (deleteDialog.type === 'department' && deleteDialog.id === selectedDeptId) {
+        setSelectedDeptId(null);
+        setSelectedCourseId(null);
+        setSelectedTopicId(null);
+      } else if (deleteDialog.type === 'course' && deleteDialog.id === selectedCourseId) {
+        setSelectedCourseId(null);
+        setSelectedTopicId(null);
+      } else if (deleteDialog.type === 'topic' && deleteDialog.id === selectedTopicId) {
+        setSelectedTopicId(null);
+      }
+      
       setDeleteDialog(null);
       fetchData();
     } catch (error) {
@@ -394,17 +504,7 @@ export const UnifiedDashboard: React.FC = () => {
     }
   };
 
-  const setRevisionCount = async (topic: Topic, count: number) => {
-    try {
-      await supabase.from('topics').update({
-        revision_count: count,
-        last_revision_at: new Date().toISOString(),
-      }).eq('id', topic.id);
-      fetchData();
-    } catch (error) {
-      toast({ title: t('common.error'), description: t('errors.saveFailed'), variant: 'destructive' });
-    }
-  };
+  const progressPercentage = stats.totalTopics > 0 ? Math.round((stats.completedTopics / stats.totalTopics) * 100) : 0;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -416,25 +516,94 @@ export const UnifiedDashboard: React.FC = () => {
     show: { opacity: 1, y: 0 },
   };
 
-  const progressPercentage = stats.totalTopics > 0 ? Math.round((stats.completedTopics / stats.totalTopics) * 100) : 0;
-
   if (loading) {
     return (
       <div className="space-y-6">
-        <Skeleton className="h-32 w-full rounded-2xl" />
+        <Skeleton className="h-16 w-full rounded-2xl" />
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
             <Skeleton key={i} className="h-24 rounded-xl" />
           ))}
         </div>
-        <Skeleton className="h-16 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+        <div className="grid md:grid-cols-3 gap-4">
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
+        </div>
       </div>
     );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
+    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6 pb-24">
+      {/* Global Search Bar */}
+      <motion.div variants={itemVariants} className="relative">
+        <div className="glass-card rounded-2xl p-4">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('common.search') + ' courses or topics...'}
+              className="pl-12 pr-10 h-12 text-base border-0 bg-muted/50 rounded-xl"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => { setSearchQuery(''); setShowSearchResults(false); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2"
+              >
+                <X className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* Search Results Dropdown */}
+          <AnimatePresence>
+            {showSearchResults && searchResults.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute left-0 right-0 top-full mt-2 z-50 bg-card border border-border rounded-xl shadow-xl overflow-hidden"
+              >
+                <ScrollArea className="max-h-80">
+                  {searchResults.map((result) => (
+                    <button
+                      key={`${result.type}-${result.id}`}
+                      onClick={() => handleSearchSelect(result)}
+                      className="w-full p-4 text-left hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
+                    >
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                        <Building2 className="w-3 h-3" />
+                        <span>{result.departmentName}</span>
+                        {result.courseName && (
+                          <>
+                            <ChevronRight className="w-3 h-3" />
+                            <BookOpen className="w-3 h-3" />
+                            <span>{result.courseName}</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {result.type === 'course' ? (
+                          <BookOpen className="w-4 h-4 text-primary" />
+                        ) : (
+                          <FileText className="w-4 h-4 text-primary" />
+                        )}
+                        <span className="font-medium">{result.name}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {result.type}
+                        </Badge>
+                      </div>
+                    </button>
+                  ))}
+                </ScrollArea>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
       {/* Welcome & Progress */}
       <motion.div variants={itemVariants} className="glass-card p-6 rounded-2xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
@@ -480,271 +649,491 @@ export const UnifiedDashboard: React.FC = () => {
         ))}
       </motion.div>
 
-      {/* Quick Actions */}
-      <motion.div variants={itemVariants} className="flex flex-wrap gap-3">
-        <Button onClick={() => { setDeptDialog(true); setFormData({}); setEditingItem(null); }} className="gap-2">
-          <Plus className="w-4 h-4" />
-          {t('departments.add')}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => { setCourseDialog(true); setFormData({}); setEditingItem(null); }}
-          disabled={departments.length === 0}
-          className="gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          {t('courses.add')}
-        </Button>
-        <Button
-          variant="outline"
-          onClick={() => { setTopicDialog(true); setFormData({}); setEditingItem(null); }}
-          disabled={departments.flatMap(d => d.courses || []).length === 0}
-          className="gap-2"
-        >
-          <Plus className="w-4 h-4" />
-          {t('topics.add')}
-        </Button>
-      </motion.div>
-
-      {/* Hierarchical Content */}
-      {departments.length === 0 ? (
-        <motion.div variants={itemVariants} className="glass-card p-12 rounded-2xl text-center">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto mb-6">
-            <Building2 className="w-10 h-10 text-primary" />
+      {/* Section-Based Content Grid */}
+      <div className="grid md:grid-cols-3 gap-4">
+        {/* Departments Section */}
+        <motion.div variants={itemVariants} className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-border/50 bg-gradient-to-r from-purple-500/10 to-violet-500/10">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-purple-500" />
+              <h2 className="font-semibold">{t('departments.title')}</h2>
+            </div>
           </div>
-          <h3 className="text-xl font-semibold mb-2">{t('departments.empty')}</h3>
-          <p className="text-muted-foreground mb-6">{t('departments.emptySubtitle')}</p>
-          <Button onClick={() => setDeptDialog(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            {t('departments.add')}
-          </Button>
+          <ScrollArea className="h-[400px]">
+            <div className="p-3 space-y-2">
+              {departments.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Building2 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">{t('departments.empty')}</p>
+                </div>
+              ) : (
+                departments.map((dept) => (
+                  <motion.div
+                    key={dept.id}
+                    whileHover={{ scale: 1.01 }}
+                    onClick={() => {
+                      setSelectedDeptId(dept.id);
+                      setSelectedCourseId(null);
+                      setSelectedTopicId(null);
+                    }}
+                    className={`p-3 rounded-xl cursor-pointer transition-all ${
+                      selectedDeptId === dept.id
+                        ? 'bg-primary/10 border-2 border-primary'
+                        : 'bg-muted/50 hover:bg-muted border-2 border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
+                          <Building2 className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{dept.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {dept.courses?.length || 0} {t('departments.courses')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 hover:opacity-100">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingItem(dept);
+                            setFormData({ name: dept.name });
+                            setDeptDialog(true);
+                          }}
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteDialog({ type: 'department', id: dept.id, name: dept.name });
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
         </motion.div>
-      ) : (
-        <motion.div variants={itemVariants} className="space-y-4">
-          {departments.map((dept) => (
-            <Collapsible key={dept.id} open={expandedDepts.has(dept.id)} onOpenChange={() => toggleDept(dept.id)}>
-              <motion.div layout className="glass-card rounded-2xl overflow-hidden">
-                <CollapsibleTrigger asChild>
-                  <div className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-500 flex items-center justify-center">
-                        <Building2 className="w-5 h-5 text-white" />
+
+        {/* Courses Section */}
+        <motion.div variants={itemVariants} className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-border/50 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-blue-500" />
+              <h2 className="font-semibold">{t('courses.title')}</h2>
+              {selectedDepartment && (
+                <Badge variant="secondary" className="ml-2 text-xs">
+                  {selectedDepartment.name}
+                </Badge>
+              )}
+            </div>
+          </div>
+          <ScrollArea className="h-[400px]">
+            <div className="p-3 space-y-2">
+              {!selectedDeptId ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">Select a department to view courses</p>
+                </div>
+              ) : selectedDepartment?.courses?.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">{t('courses.empty')}</p>
+                </div>
+              ) : (
+                selectedDepartment?.courses?.map((course) => {
+                  const topicCount = course.topics?.length || 0;
+                  const completedCount = course.topics?.filter((t) => t.completed).length || 0;
+                  const progress = topicCount > 0 ? Math.round((completedCount / topicCount) * 100) : 0;
+
+                  return (
+                    <motion.div
+                      key={course.id}
+                      whileHover={{ scale: 1.01 }}
+                      onClick={() => {
+                        setSelectedCourseId(course.id);
+                        setSelectedTopicId(null);
+                      }}
+                      className={`p-3 rounded-xl cursor-pointer transition-all ${
+                        selectedCourseId === course.id
+                          ? 'bg-primary/10 border-2 border-primary'
+                          : 'bg-muted/50 hover:bg-muted border-2 border-transparent'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                            <BookOpen className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{course.name}</p>
+                            {course.code && (
+                              <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
+                                {course.code}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingItem(course);
+                              setFormData({ name: course.name, code: course.code });
+                              setSelectedDept(course.department_id);
+                              setCourseDialog(true);
+                            }}
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteDialog({ type: 'course', id: course.id, name: course.name });
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="font-semibold">{dept.name}</h3>
-                        <p className="text-xs text-muted-foreground">{dept.courses?.length || 0} {t('departments.courses')}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <span>{topicCount} {t('courses.topics')}</span>
+                        <span>•</span>
+                        <span>{progress}% complete</span>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setEditingItem(dept); setFormData({ name: dept.name }); setDeptDialog(true); }}>
-                        <Edit3 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteDialog({ type: 'department', id: dept.id, name: dept.name }); }}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      {expandedDepts.has(dept.id) ? <ChevronDown className="w-5 h-5" /> : <ChevronRight className="w-5 h-5" />}
-                    </div>
-                  </div>
-                </CollapsibleTrigger>
+                      <Progress value={progress} className="h-1.5 mt-2" />
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
+        </motion.div>
 
-                <CollapsibleContent>
-                  <div className="px-4 pb-4 pl-8 space-y-3">
-                    {dept.courses?.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4">{t('courses.empty')}</p>
-                    ) : (
-                      dept.courses?.map((course) => {
-                        const topicCount = course.topics?.length || 0;
-                        const completedCount = course.topics?.filter((t) => t.completed).length || 0;
-                        const progress = topicCount > 0 ? Math.round((completedCount / topicCount) * 100) : 0;
+        {/* Topics Section */}
+        <motion.div variants={itemVariants} className="glass-card rounded-2xl overflow-hidden">
+          <div className="p-4 border-b border-border/50 bg-gradient-to-r from-emerald-500/10 to-green-500/10">
+            <div className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-emerald-500" />
+              <h2 className="font-semibold">{t('topics.title')}</h2>
+              {selectedCourseData && (
+                <Badge variant="secondary" className="ml-2 text-xs">
+                  {selectedCourseData.name}
+                </Badge>
+              )}
+            </div>
+          </div>
+          <ScrollArea className="h-[400px]">
+            <div className="p-3 space-y-2">
+              {!selectedCourseId ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">Select a course to view topics</p>
+                </div>
+              ) : selectedCourseData?.topics?.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">{t('topics.empty')}</p>
+                </div>
+              ) : (
+                selectedCourseData?.topics?.map((topic) => {
+                  const revisionInfo = getRevisionInfo(topic);
 
-                        return (
-                          <Collapsible key={course.id} open={expandedCourses.has(course.id)} onOpenChange={() => toggleCourse(course.id)}>
-                            <div className="glass-card rounded-xl overflow-hidden">
-                              <CollapsibleTrigger asChild>
-                                <div className="p-3 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors">
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                                      <BookOpen className="w-4 h-4 text-white" />
-                                    </div>
-                                    <div>
-                                      <h4 className="font-medium">{course.name}</h4>
-                                      <div className="flex items-center gap-2">
-                                        {course.code && <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{course.code}</span>}
-                                        <span className="text-xs text-muted-foreground">{topicCount} {t('courses.topics')} • {progress}%</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setEditingItem(course); setFormData({ name: course.name, code: course.code }); setSelectedDept(course.department_id); setCourseDialog(true); }}>
-                                      <Edit3 className="w-3 h-3" />
-                                    </Button>
-                                    <Button variant="ghost" size="sm" className="text-destructive" onClick={(e) => { e.stopPropagation(); setDeleteDialog({ type: 'course', id: course.id, name: course.name }); }}>
-                                      <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                    {expandedCourses.has(course.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                  </div>
-                                </div>
-                              </CollapsibleTrigger>
+                  return (
+                    <motion.div
+                      key={topic.id}
+                      whileHover={{ scale: 1.01 }}
+                      onClick={() => setSelectedTopicId(topic.id)}
+                      className={`p-3 rounded-xl cursor-pointer transition-all ${
+                        selectedTopicId === topic.id
+                          ? 'bg-primary/10 border-2 border-primary'
+                          : 'bg-muted/50 hover:bg-muted border-2 border-transparent'
+                      } ${topic.completed ? 'border-l-4 border-l-green-500' : ''}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleComplete(topic);
+                          }}
+                          className="mt-0.5"
+                        >
+                          {topic.completed ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <Circle className="w-5 h-5 text-muted-foreground hover:text-primary" />
+                          )}
+                        </motion.button>
+                        <div className="flex-1 min-w-0">
+                          <p className={`font-medium text-sm ${topic.completed ? 'line-through text-muted-foreground' : ''}`}>
+                            {topic.name}
+                          </p>
+                          {topic.description && (
+                            <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                              {topic.description}
+                            </p>
+                          )}
+                          
+                          {/* Revision Info as Text */}
+                          <div className={`flex items-center gap-1.5 mt-2 text-xs ${
+                            revisionInfo.status === 'complete' ? 'text-green-600' :
+                            revisionInfo.status === 'progress' ? 'text-blue-600' :
+                            'text-muted-foreground'
+                          }`}>
+                            <RefreshCw className="w-3 h-3" />
+                            <span>{revisionInfo.text}</span>
+                          </div>
 
-                              <CollapsibleContent>
-                                <div className="px-3 pb-3 pl-6 space-y-2">
-                                  {course.topics?.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground py-2">{t('topics.empty')}</p>
-                                  ) : (
-                                    course.topics?.map((topic) => (
-                                      <Collapsible key={topic.id} open={expandedTopics.has(topic.id)} onOpenChange={() => toggleTopic(topic.id)}>
-                                        <div className={`rounded-lg border ${topic.completed ? 'border-l-4 border-l-green-500' : ''}`}>
-                                          <div className="p-3 flex items-start gap-3">
-                                            <motion.button
-                                              whileTap={{ scale: 0.9 }}
-                                              onClick={() => toggleComplete(topic)}
-                                              className="mt-0.5"
-                                            >
-                                              {topic.completed ? (
-                                                <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                              ) : (
-                                                <Circle className="w-5 h-5 text-muted-foreground hover:text-primary" />
-                                              )}
-                                            </motion.button>
-                                            <div className="flex-1 min-w-0">
-                                              <div className="flex items-start justify-between gap-2">
-                                                <div className="flex-1">
-                                                  <h5 className={`font-medium ${topic.completed ? 'line-through text-muted-foreground' : ''}`}>
-                                                    {topic.name}
-                                                  </h5>
-                                                  {topic.description && (
-                                                    <p className="text-xs text-muted-foreground line-clamp-1">{topic.description}</p>
-                                                  )}
-                                                </div>
-                                                <CollapsibleTrigger asChild>
-                                                  <Button variant="ghost" size="sm">
-                                                    {expandedTopics.has(topic.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                                  </Button>
-                                                </CollapsibleTrigger>
-                                              </div>
-
-                                              {/* Tags & Stats */}
-                                              <div className="flex flex-wrap items-center gap-2 mt-2">
-                                                {topic.tags?.map((tag) => (
-                                                  <Badge key={tag} variant="secondary" className="text-xs">
-                                                    <Tag className="w-2.5 h-2.5 mr-1" />
-                                                    {tag}
-                                                  </Badge>
-                                                ))}
-                                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                  <RefreshCw className="w-3 h-3" />
-                                                  {topic.revision_count || 0}
-                                                </span>
-                                                {topic.last_revision_at && (
-                                                  <span className="text-xs text-muted-foreground">
-                                                    Last: {format(new Date(topic.last_revision_at), 'MMM d')}
-                                                  </span>
-                                                )}
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          <CollapsibleContent>
-                                            <div className="px-3 pb-3 border-t pt-3 space-y-3">
-                                              {/* Revision Controls */}
-                                              <div className="flex flex-wrap items-center gap-2">
-                                                <span className="text-xs text-muted-foreground">Revision:</span>
-                                                <Select
-                                                  value={String(topic.revision_count || 0)}
-                                                  onValueChange={(v) => setRevisionCount(topic, parseInt(v))}
-                                                >
-                                                  <SelectTrigger className="w-20 h-7 text-xs">
-                                                    <SelectValue />
-                                                  </SelectTrigger>
-                                                  <SelectContent>
-                                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
-                                                      <SelectItem key={n} value={String(n)}>{n}</SelectItem>
-                                                    ))}
-                                                  </SelectContent>
-                                                </Select>
-                                                {topic.completed && (
-                                                  <Button variant="outline" size="sm" onClick={() => handleRevision(topic)} className="gap-1 h-7 text-xs">
-                                                    <RefreshCw className="w-3 h-3" />
-                                                    {t('topics.revise')}
-                                                  </Button>
-                                                )}
-                                                <Button variant="ghost" size="sm" onClick={() => { setEditingItem(topic); setFormData({ name: topic.name, description: topic.description, tags: topic.tags?.join(', ') }); setSelectedCourse(topic.course_id); setTopicDialog(true); }} className="h-7 text-xs">
-                                                  <Edit3 className="w-3 h-3 mr-1" />
-                                                  Edit
-                                                </Button>
-                                                <Button variant="ghost" size="sm" className="text-destructive h-7 text-xs" onClick={() => setDeleteDialog({ type: 'topic', id: topic.id, name: topic.name })}>
-                                                  <Trash2 className="w-3 h-3 mr-1" />
-                                                  Delete
-                                                </Button>
-                                              </div>
-
-                                              {/* Resources */}
-                                              <div>
-                                                <div className="flex items-center justify-between mb-2">
-                                                  <span className="text-xs font-medium">{t('topics.resources')}</span>
-                                                  <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={() => { setSelectedTopic(topic.id); setFormData({ type: 'link' }); setEditingItem(null); setResourceDialog(true); }}>
-                                                    <Plus className="w-3 h-3 mr-1" />
-                                                    Add
-                                                  </Button>
-                                                </div>
-                                                {topic.resources?.length === 0 ? (
-                                                  <p className="text-xs text-muted-foreground">{t('resources.empty')}</p>
-                                                ) : (
-                                                  <div className="space-y-1">
-                                                    {topic.resources?.map((resource) => (
-                                                      <div key={resource.id} className="flex items-center justify-between p-2 rounded bg-muted/50 text-xs group">
-                                                        <div className="flex items-center gap-2 min-w-0">
-                                                          {resource.type === 'pdf' && <FileUp className="w-3 h-3 text-red-500" />}
-                                                          {resource.type === 'link' && <LinkIcon className="w-3 h-3 text-blue-500" />}
-                                                          {resource.type === 'note' && <StickyNote className="w-3 h-3 text-yellow-500" />}
-                                                          <span className="truncate">{resource.title || resource.url || 'Untitled'}</span>
-                                                          {resource.url && (
-                                                            <a href={resource.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                                              <ExternalLink className="w-3 h-3" />
-                                                            </a>
-                                                          )}
-                                                        </div>
-                                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-                                                          <Button variant="ghost" size="sm" className="h-5 w-5 p-0" onClick={() => { setSelectedTopic(topic.id); setEditingItem(resource); setFormData({ title: resource.title, type: resource.type, url: resource.url, content: resource.content }); setResourceDialog(true); }}>
-                                                            <Edit3 className="w-2.5 h-2.5" />
-                                                          </Button>
-                                                          <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive" onClick={() => setDeleteDialog({ type: 'resources', id: resource.id, name: resource.title || 'Resource' })}>
-                                                            <Trash2 className="w-2.5 h-2.5" />
-                                                          </Button>
-                                                        </div>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                          </CollapsibleContent>
-                                        </div>
-                                      </Collapsible>
-                                    ))
-                                  )}
-                                  <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground" onClick={() => { setSelectedCourse(course.id); setFormData({}); setEditingItem(null); setTopicDialog(true); }}>
-                                    <Plus className="w-3 h-3 mr-2" />
-                                    {t('topics.add')}
-                                  </Button>
-                                </div>
-                              </CollapsibleContent>
+                          {/* Tags */}
+                          {topic.tags && topic.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {topic.tags.map((tag) => (
+                                <Badge key={tag} variant="secondary" className="text-xs py-0 px-1.5">
+                                  {tag}
+                                </Badge>
+                              ))}
                             </div>
-                          </Collapsible>
-                        );
-                      })
-                    )}
-                    <Button variant="ghost" size="sm" className="w-full justify-start text-muted-foreground" onClick={() => { setSelectedDept(dept.id); setFormData({}); setEditingItem(null); setCourseDialog(true); }}>
-                      <Plus className="w-3 h-3 mr-2" />
-                      {t('courses.add')}
-                    </Button>
-                  </div>
-                </CollapsibleContent>
-              </motion.div>
-            </Collapsible>
-          ))}
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingItem(topic);
+                              setFormData({
+                                name: topic.name,
+                                description: topic.description,
+                                tags: topic.tags?.join(', '),
+                              });
+                              setSelectedCourse(topic.course_id);
+                              setTopicDialog(true);
+                            }}
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteDialog({ type: 'topic', id: topic.id, name: topic.name });
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
         </motion.div>
-      )}
+      </div>
+
+      {/* Selected Topic Details */}
+      <AnimatePresence>
+        {selectedTopicData && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="glass-card rounded-2xl p-6"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                  <Building2 className="w-4 h-4" />
+                  <span>{selectedDepartment?.name}</span>
+                  <ChevronRight className="w-4 h-4" />
+                  <BookOpen className="w-4 h-4" />
+                  <span>{selectedCourseData?.name}</span>
+                </div>
+                <h3 className="text-xl font-semibold flex items-center gap-2">
+                  {selectedTopicData.completed && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                  {selectedTopicData.name}
+                </h3>
+                {selectedTopicData.description && (
+                  <p className="text-muted-foreground mt-1">{selectedTopicData.description}</p>
+                )}
+              </div>
+              {selectedTopicData.completed && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleRevision(selectedTopicData)}
+                  className="gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Mark Revised
+                </Button>
+              )}
+            </div>
+
+            {/* Revision Info Card */}
+            <div className="bg-muted/50 rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="font-medium">Revision Status</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {getRevisionInfo(selectedTopicData).text}
+              </p>
+              {selectedTopicData.last_revision_at && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Last revised: {format(new Date(selectedTopicData.last_revision_at), 'PPP')}
+                </p>
+              )}
+              {selectedTopicData.completed_at && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Completed: {format(new Date(selectedTopicData.completed_at), 'PPP')}
+                </p>
+              )}
+            </div>
+
+            {/* Resources */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4" />
+                  {t('topics.resources')}
+                </h4>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedTopic(selectedTopicData.id);
+                    setFormData({ type: 'link' });
+                    setEditingItem(null);
+                    setResourceDialog(true);
+                  }}
+                  className="gap-1"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Resource
+                </Button>
+              </div>
+              {selectedTopicData.resources?.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('resources.empty')}</p>
+              ) : (
+                <div className="grid gap-2">
+                  {selectedTopicData.resources?.map((resource) => (
+                    <div
+                      key={resource.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 group"
+                    >
+                      <div className="flex items-center gap-3">
+                        {resource.type === 'pdf' && <FileUp className="w-4 h-4 text-red-500" />}
+                        {resource.type === 'link' && <LinkIcon className="w-4 h-4 text-blue-500" />}
+                        {resource.type === 'note' && <StickyNote className="w-4 h-4 text-yellow-500" />}
+                        {resource.type === 'youtube' && <ExternalLink className="w-4 h-4 text-red-500" />}
+                        <span className="text-sm">{resource.title || resource.url || 'Untitled'}</span>
+                        {resource.url && (
+                          <a
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          onClick={() => {
+                            setSelectedTopic(selectedTopicData.id);
+                            setEditingItem(resource);
+                            setFormData({
+                              title: resource.title,
+                              type: resource.type,
+                              url: resource.url,
+                              content: resource.content,
+                            });
+                            setResourceDialog(true);
+                          }}
+                        >
+                          <Edit3 className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-destructive"
+                          onClick={() => setDeleteDialog({ type: 'resources', id: resource.id, name: resource.title || 'Resource' })}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Action Buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 lg:left-auto lg:translate-x-0 lg:right-8 z-40"
+      >
+        <div className="flex items-center gap-2 p-2 rounded-2xl glass-card shadow-xl">
+          <Button
+            onClick={() => { setDeptDialog(true); setFormData({}); setEditingItem(null); }}
+            className="gap-2 bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600 text-white border-0"
+          >
+            <Building2 className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('departments.add')}</span>
+          </Button>
+          <Button
+            onClick={() => { setCourseDialog(true); setFormData({}); setEditingItem(null); setSelectedDept(selectedDeptId || ''); }}
+            disabled={departments.length === 0}
+            className="gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0"
+          >
+            <BookOpen className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('courses.add')}</span>
+          </Button>
+          <Button
+            onClick={() => { setTopicDialog(true); setFormData({}); setEditingItem(null); setSelectedCourse(selectedCourseId || ''); }}
+            disabled={departments.flatMap(d => d.courses || []).length === 0}
+            className="gap-2 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white border-0"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('topics.add')}</span>
+          </Button>
+        </div>
+      </motion.div>
 
       {/* Department Dialog */}
       <Dialog open={deptDialog} onOpenChange={setDeptDialog}>
