@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { DeveloperCredit } from '@/components/DeveloperCredit';
-import { AIChatbot, AIChatbotHandle } from '@/components/AIChatbot';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -14,7 +13,6 @@ import { StudyService, Department, Course, Topic } from '@/services/studyService
 type Section = 'departments' | 'courses' | 'topics' | 'search';
 
 const Dashboard: React.FC = () => {
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
   const { user } = useAuth();
   
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -808,7 +806,6 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </main>
-      <AIChatbot ref={chatbotRef} courses={courses} topics={topics} />
 
       <style>{`
         @keyframes slideIn {
