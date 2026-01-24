@@ -599,21 +599,27 @@ const Dashboard: React.FC = () => {
                   ) : (
                     <div className="space-y-5">
                       {topics.map((topic, idx) => (
-                        <div
+                        <button
                           key={topic.id}
+                          onClick={() => {
+                            // Navigate to topic detail view or mark as selected
+                            console.log('Topic clicked:', topic.id);
+                            // You can expand this to show topic details or navigate
+                          }}
                           style={{ animation: `slideIn 0.5s ease-out ${idx * 0.05}s both` }}
+                          className="w-full text-left group relative overflow-hidden rounded-2xl border transition-all duration-300 p-6 cursor-pointer active:scale-95 hover:scale-105"
                         >
-                          <div className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 p-6 ${
+                          <div className={`${
                             topic.completed
                               ? 'bg-gradient-to-br from-slate-800/40 via-slate-900/40 to-slate-950/60 border-slate-700/20 hover:border-slate-600/30'
                               : 'bg-gradient-to-br from-slate-800/80 via-slate-900 to-slate-950 border-slate-700/50 hover:border-pink-500/50'
-                          } hover:shadow-xl transition-all duration-300 ${topic.completed ? '' : 'hover:-translate-y-0.5 hover:shadow-pink-500/20'}`}>
-                            <div className={`absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${
+                          } transition-all duration-300 ${topic.completed ? '' : 'hover:-translate-y-0.5 hover:shadow-pink-500/20'} absolute inset-0 border rounded-2xl`}></div>
+                            <div className={`absolute inset-0 bg-gradient-to-br transition-opacity duration-300 rounded-2xl ${
                               topic.completed
                                 ? 'from-transparent to-transparent'
                                 : 'from-pink-500/10 to-red-500/5 opacity-0 group-hover:opacity-100'
                             }`}></div>
-                            <div className="absolute inset-0 bg-gradient-to-t from-pink-600/0 via-transparent to-transparent group-hover:from-pink-600/5 transition-all duration-300"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-pink-600/0 via-transparent to-transparent group-hover:from-pink-600/5 transition-all duration-300 rounded-2xl"></div>
                             
                             <div className="relative z-10">
                               <div className="flex items-start justify-between mb-4">
@@ -631,14 +637,15 @@ const Dashboard: React.FC = () => {
                                     </p>
                                   )}
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => deleteTopic(topic.id)}
-                                  className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0 transition-all"
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteTopic(topic.id);
+                                  }}
+                                  className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0 transition-all p-2 rounded-lg hover:bg-red-500/20"
                                 >
                                   <Trash2 className="w-4 h-4" />
-                                </Button>
+                                </button>
                               </div>
                               <div className="flex items-center justify-between flex-wrap gap-4 pt-5 border-t border-slate-700/30 group-hover:border-pink-500/20 transition">
                                 <div className="flex items-center gap-3 flex-wrap">
@@ -674,27 +681,33 @@ const Dashboard: React.FC = () => {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  <Button
-                                    onClick={() => incrementRevisionCount(topic.id)}
-                                    className="bg-gradient-to-r from-blue-500/40 to-cyan-500/40 hover:from-blue-500/60 hover:to-cyan-500/60 text-blue-200 border border-blue-500/30 text-xs h-8"
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      incrementRevisionCount(topic.id);
+                                    }}
+                                    className="bg-gradient-to-r from-blue-500/40 to-cyan-500/40 hover:from-blue-500/60 hover:to-cyan-500/60 text-blue-200 border border-blue-500/30 text-xs h-8 px-4 rounded-lg font-medium transition-all active:scale-95"
                                   >
                                     📚 Mark Revised
-                                  </Button>
-                                  <Button
-                                    onClick={() => toggleTopicCompletion(topic.id)}
-                                    className={`text-xs h-8 border ${
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleTopicCompletion(topic.id);
+                                    }}
+                                    className={`text-xs h-8 px-4 rounded-lg font-medium border transition-all active:scale-95 ${
                                       topic.completed
                                         ? 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 border-slate-600'
                                         : 'bg-gradient-to-r from-green-500/40 to-emerald-500/40 hover:from-green-500/60 hover:to-emerald-500/60 text-green-200 border-green-500/30'
                                     }`}
                                   >
                                     {topic.completed ? '✓ Undo' : '✓ Mark Done'}
-                                  </Button>
+                                  </button>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )}
