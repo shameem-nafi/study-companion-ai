@@ -263,10 +263,11 @@ const Dashboard: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Breadcrumb Navigation with Back Button - Smart Futuristic Design */}
+              {/* Floating Back Button - Only show on courses/topics pages */}
               {currentSection !== 'departments' && currentSection !== 'search' && (
-                <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                  <Button
+                <>
+                  {/* Floating Action Button */}
+                  <button
                     onClick={() => {
                       if (currentSection === 'courses') {
                         setCurrentSection('departments');
@@ -276,14 +277,20 @@ const Dashboard: React.FC = () => {
                         setSelectedCourse(null);
                       }
                     }}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all h-11 px-6 font-semibold text-base flex items-center gap-2 group"
+                    className="fixed top-24 left-6 lg:left-72 z-40 w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center group hover:scale-110 active:scale-95"
                   >
-                    <span className="text-xl group-hover:-translate-x-1 transition-transform">←</span>
-                    <span>Back</span>
-                  </Button>
-                  
-                  {/* Compact Breadcrumb Trail */}
-                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-3xl group-hover:-translate-x-0.5 transition-transform">←</span>
+                  </button>
+
+                  {/* Tooltip on hover */}
+                  <div className="fixed top-44 left-6 lg:left-72 z-40 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    <div className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold whitespace-nowrap">
+                      Go Back
+                    </div>
+                  </div>
+
+                  {/* Breadcrumb Navigation */}
+                  <div className="mb-8 mt-20 flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setCurrentSection('departments')}
                       className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-blue-500/30 to-blue-600/30 text-blue-200 border border-blue-500/30 hover:from-blue-500/50 hover:to-blue-600/50 transition-all"
@@ -316,7 +323,7 @@ const Dashboard: React.FC = () => {
                       </>
                     )}
                   </div>
-                </div>
+                </>
               )}
 
               {/* DEPARTMENTS SECTION */}
