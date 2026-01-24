@@ -263,67 +263,68 @@ const Dashboard: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Floating Back Button - Only show on courses/topics pages */}
+              {/* Fixed Top Navigation Bar - Only show on courses/topics pages */}
               {currentSection !== 'departments' && currentSection !== 'search' && (
-                <>
-                  {/* Floating Action Button */}
-                  <button
-                    onClick={() => {
-                      if (currentSection === 'courses') {
-                        setCurrentSection('departments');
-                        setSelectedDepartment(null);
-                      } else if (currentSection === 'topics') {
-                        setCurrentSection('courses');
-                        setSelectedCourse(null);
-                      }
-                    }}
-                    className="fixed top-24 left-6 lg:left-72 z-40 w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white shadow-lg hover:shadow-blue-500/50 transition-all duration-300 flex items-center justify-center group hover:scale-110 active:scale-95"
-                  >
-                    <span className="text-3xl group-hover:-translate-x-0.5 transition-transform">←</span>
-                  </button>
+                <div className="fixed top-20 left-0 right-0 z-30 bg-gradient-to-r from-slate-900/95 to-slate-950/95 backdrop-blur-xl border-b border-slate-700/30 shadow-lg">
+                  <div className="max-w-6xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
+                    {/* Back Button */}
+                    <Button
+                      onClick={() => {
+                        if (currentSection === 'courses') {
+                          setCurrentSection('departments');
+                          setSelectedDepartment(null);
+                        } else if (currentSection === 'topics') {
+                          setCurrentSection('courses');
+                          setSelectedCourse(null);
+                        }
+                      }}
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all h-10 px-5 font-semibold text-sm flex items-center gap-2 group flex-shrink-0"
+                    >
+                      <span className="text-lg group-hover:-translate-x-0.5 transition-transform">←</span>
+                      <span>Back</span>
+                    </Button>
 
-                  {/* Tooltip on hover */}
-                  <div className="fixed top-44 left-6 lg:left-72 z-40 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                    <div className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm font-semibold whitespace-nowrap">
-                      Go Back
+                    {/* Breadcrumb Navigation */}
+                    <div className="flex flex-wrap items-center gap-2 flex-1 overflow-x-auto">
+                      <button
+                        onClick={() => setCurrentSection('departments')}
+                        className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-blue-500/30 to-blue-600/30 text-blue-200 border border-blue-500/30 hover:from-blue-500/50 hover:to-blue-600/50 transition-all whitespace-nowrap"
+                      >
+                        Departments
+                      </button>
+                      
+                      {currentSection !== 'departments' && selectedDepartment && (
+                        <>
+                          <div className="text-slate-500 flex-shrink-0">/</div>
+                          <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-purple-500/30 to-purple-600/30 text-purple-200 border border-purple-500/30 truncate max-w-[120px]">
+                            {selectedDepartment.name}
+                          </span>
+                        </>
+                      )}
+                      
+                      {currentSection === 'topics' && (
+                        <>
+                          <div className="text-slate-500 flex-shrink-0">/</div>
+                          <button
+                            onClick={() => loadCourses(selectedDepartment!.id)}
+                            className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-cyan-500/30 to-cyan-600/30 text-cyan-200 border border-cyan-500/30 hover:from-cyan-500/50 hover:to-cyan-600/50 transition-all whitespace-nowrap"
+                          >
+                            Courses
+                          </button>
+                          <div className="text-slate-500 flex-shrink-0">/</div>
+                          <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500/30 to-pink-600/30 text-pink-200 border border-pink-500/30 truncate max-w-[120px]">
+                            {selectedCourse?.name}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
+                </div>
+              )}
 
-                  {/* Breadcrumb Navigation */}
-                  <div className="mb-8 mt-20 flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => setCurrentSection('departments')}
-                      className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-blue-500/30 to-blue-600/30 text-blue-200 border border-blue-500/30 hover:from-blue-500/50 hover:to-blue-600/50 transition-all"
-                    >
-                      Departments
-                    </button>
-                    
-                    {currentSection !== 'departments' && selectedDepartment && (
-                      <>
-                        <div className="text-slate-500">/</div>
-                        <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-purple-500/30 to-purple-600/30 text-purple-200 border border-purple-500/30 truncate max-w-[150px]">
-                          {selectedDepartment.name}
-                        </span>
-                      </>
-                    )}
-                    
-                    {currentSection === 'topics' && (
-                      <>
-                        <div className="text-slate-500">/</div>
-                        <button
-                          onClick={() => loadCourses(selectedDepartment!.id)}
-                          className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-cyan-500/30 to-cyan-600/30 text-cyan-200 border border-cyan-500/30 hover:from-cyan-500/50 hover:to-cyan-600/50 transition-all"
-                        >
-                          Courses
-                        </button>
-                        <div className="text-slate-500">/</div>
-                        <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500/30 to-pink-600/30 text-pink-200 border border-pink-500/30 truncate max-w-[150px]">
-                          {selectedCourse?.name}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </>
+              {/* Add padding to account for fixed top bar when it's visible */}
+              {currentSection !== 'departments' && currentSection !== 'search' && (
+                <div className="h-24"></div>
               )}
 
               {/* DEPARTMENTS SECTION */}
