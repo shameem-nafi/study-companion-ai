@@ -202,27 +202,6 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
 
   return (
     <>
-      {/* Floating Chat Button (for when chat is closed) */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              console.log('Floating chat button clicked - opening chatbot');
-              setIsOpen(true);
-            }}
-            className="fixed bottom-8 right-8 lg:bottom-24 lg:right-24 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:shadow-2xl hover:shadow-purple-500/50 shadow-lg flex items-center justify-center text-white z-40 transition-all duration-300"
-            title="Open AI Study Assistant"
-          >
-            <MessageCircle className="w-6 h-6" />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (

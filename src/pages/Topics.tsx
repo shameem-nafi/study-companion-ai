@@ -17,7 +17,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Sidebar } from '@/components/Sidebar';
-import { AIChatbot, AIChatbotHandle } from '@/components/AIChatbot';
 
 const Topics: React.FC = () => {
   const { t } = useTranslation();

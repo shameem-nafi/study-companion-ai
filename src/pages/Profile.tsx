@@ -24,21 +24,15 @@ import { Input } from '@/components/ui/input';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from '@/components/Sidebar';
-import { AIChatbot, AIChatbotHandle } from '@/components/AIChatbot';
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isDark } = useTheme();
   const { profile, signOut } = useAuth();
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-
-  const handleToggleChatbot = () => {
-    chatbotRef.current?.open();
-  };
 
   const handleNavigate = (page: string) => {
     if (page === 'dashboard') navigate('/dashboard');
@@ -499,7 +493,6 @@ const Profile: React.FC = () => {
         </div>
       </main>
 
-      <AIChatbot ref={chatbotRef} />
     </div>
   );
 };
