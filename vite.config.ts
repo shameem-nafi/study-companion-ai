@@ -11,7 +11,10 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // SPA routing: fallback to index.html for all non-file routes
+    middlewareMode: false,
   },
+  appType: 'spa',
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
