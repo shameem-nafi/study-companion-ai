@@ -174,6 +174,34 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const toggleTopicCompletion = async (id: string) => {
+    try {
+      const topic = topics.find(t => t.id === id);
+      if (!topic) return;
+      const updatedTopic = await StudyService.updateTopic(id, {
+        completed: !topic.completed
+      });
+      setTopics(topics.map(t => t.id === id ? updatedTopic : t));
+    } catch (error) {
+      console.error('Failed to toggle completion:', error);
+    }
+  };
+
+  const incrementRevisionCount = async (id: string) => {
+    try {
+      const topic = topics.find(t => t.id === id);
+      if (!topic) return;
+      const newCount = (topic.revision_count || 0) + 1;
+      const updatedTopic = await StudyService.updateTopic(id, {
+        revision_count: newCount,
+        last_revision_at: new Date().toISOString()
+      });
+      setTopics(topics.map(t => t.id === id ? updatedTopic : t));
+    } catch (error) {
+      console.error('Failed to increment revision:', error);
+    }
+  };
+
   const handleToggleChatbot = () => {
     chatbotRef.current?.open();
   };
@@ -235,36 +263,53 @@ const Dashboard: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Breadcrumb Navigation */}
+              {/* Breadcrumb Navigation with Back Button */}
               {currentSection !== 'departments' && currentSection !== 'search' && (
-                <div className="flex items-center gap-2 mb-8 text-sm px-4 py-3 bg-slate-800/30 rounded-lg border border-slate-700/30 w-fit backdrop-blur">
-                  <button
-                    onClick={() => setCurrentSection('departments')}
-                    className="text-blue-400 hover:text-blue-300 font-medium transition"
+                <div className="flex items-center gap-4 mb-8">
+                  <Button
+                    onClick={() => {
+                      if (currentSection === 'courses') {
+                        setCurrentSection('departments');
+                        setSelectedDepartment(null);
+                      } else if (currentSection === 'topics') {
+                        setCurrentSection('courses');
+                        setSelectedCourse(null);
+                      }
+                    }}
+                    variant="outline"
+                    className="bg-slate-800/50 border-slate-700 hover:bg-slate-700 text-white"
                   >
-                    Departments
-                  </button>
-                  {currentSection !== 'departments' && (
-                    <>
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
-                      {selectedDepartment && (
-                        <span className="text-slate-300 font-medium">{selectedDepartment.name}</span>
-                      )}
-                    </>
-                  )}
-                  {currentSection === 'topics' && selectedCourse && (
-                    <>
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
-                      <button
-                        onClick={() => loadCourses(selectedDepartment!.id)}
-                        className="text-blue-400 hover:text-blue-300 font-medium transition"
-                      >
-                        Courses
-                      </button>
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
-                      <span className="text-slate-300 font-medium">{selectedCourse.name}</span>
-                    </>
-                  )}
+                    ← Back
+                  </Button>
+                  <div className="flex items-center gap-2 text-sm px-4 py-3 bg-slate-800/30 rounded-lg border border-slate-700/30 backdrop-blur">
+                    <button
+                      onClick={() => setCurrentSection('departments')}
+                      className="text-blue-400 hover:text-blue-300 font-medium transition"
+                    >
+                      Departments
+                    </button>
+                    {currentSection !== 'departments' && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-slate-500" />
+                        {selectedDepartment && (
+                          <span className="text-slate-300 font-medium">{selectedDepartment.name}</span>
+                        )}
+                      </>
+                    )}
+                    {currentSection === 'topics' && selectedCourse && (
+                      <>
+                        <ChevronRight className="w-4 h-4 text-slate-500" />
+                        <button
+                          onClick={() => loadCourses(selectedDepartment!.id)}
+                          className="text-blue-400 hover:text-blue-300 font-medium transition"
+                        >
+                          Courses
+                        </button>
+                        <ChevronRight className="w-4 h-4 text-slate-500" />
+                        <span className="text-slate-300 font-medium">{selectedCourse.name}</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -519,37 +564,57 @@ const Dashboard: React.FC = () => {
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
+                              <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-slate-700/30">
+                                <div className="flex items-center gap-3 flex-wrap">
+                                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                                    topic.completed
+                                      ? 'bg-slate-700/30'
+                                      : 'bg-slate-700/50 group-hover:bg-slate-600/50'
+                                  }`}>
+                                    <Clock className="w-4 h-4 text-slate-400" />
+                                    <span className={`text-sm font-medium ${topic.completed ? 'text-slate-500' : 'text-slate-300'}`}>
+                                      {getRevisionText(topic.revision_count)}
+                                    </span>
+                                  </div>
 
-                              <div className="flex items-center gap-3 flex-wrap">
-                                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
-                                  topic.completed
-                                    ? 'bg-slate-700/30'
-                                    : 'bg-slate-700/50 group-hover:bg-slate-600/50'
-                                }`}>
-                                  <Clock className="w-4 h-4 text-slate-400" />
-                                  <span className={`text-sm font-medium ${topic.completed ? 'text-slate-500' : 'text-slate-300'}`}>
-                                    {getRevisionText(topic.revision_count)}
-                                  </span>
+                                  {topic.tags && topic.tags.length > 0 && (
+                                    <div className="flex gap-2">
+                                      {topic.tags.map(tag => (
+                                        <Badge
+                                          key={tag}
+                                          className="bg-gradient-to-r from-blue-500/30 to-purple-500/30 text-blue-200 border-blue-500/30 text-xs"
+                                        >
+                                          #{tag}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {topic.completed && (
+                                    <Badge className="bg-gradient-to-r from-green-500/30 to-emerald-500/30 text-green-200 border-green-500/30 flex items-center gap-1">
+                                      <Zap className="w-3 h-3" /> Completed
+                                    </Badge>
+                                  )}
                                 </div>
 
-                                {topic.tags && topic.tags.length > 0 && (
-                                  <div className="flex gap-2">
-                                    {topic.tags.map(tag => (
-                                      <Badge
-                                        key={tag}
-                                        className="bg-gradient-to-r from-blue-500/30 to-purple-500/30 text-blue-200 border-blue-500/30 text-xs"
-                                      >
-                                        #{tag}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-
-                                {topic.completed && (
-                                  <Badge className="bg-gradient-to-r from-green-500/30 to-emerald-500/30 text-green-200 border-green-500/30 flex items-center gap-1">
-                                    <Zap className="w-3 h-3" /> Completed
-                                  </Badge>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    onClick={() => incrementRevisionCount(topic.id)}
+                                    className="bg-gradient-to-r from-blue-500/40 to-cyan-500/40 hover:from-blue-500/60 hover:to-cyan-500/60 text-blue-200 border border-blue-500/30 text-xs h-8"
+                                  >
+                                    📚 Mark Revised
+                                  </Button>
+                                  <Button
+                                    onClick={() => toggleTopicCompletion(topic.id)}
+                                    className={`text-xs h-8 border ${
+                                      topic.completed
+                                        ? 'bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-300 border-slate-600'
+                                        : 'bg-gradient-to-r from-green-500/40 to-emerald-500/40 hover:from-green-500/60 hover:to-emerald-500/60 text-green-200 border-green-500/30'
+                                    }`}
+                                  >
+                                    {topic.completed ? '✓ Undo' : '✓ Mark Done'}
+                                  </Button>
+                                </div>
                               </div>
                             </div>
                           </div>
