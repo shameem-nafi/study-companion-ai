@@ -277,7 +277,7 @@ const Dashboard: React.FC = () => {
                         setSelectedCourse(null);
                       }
                     }}
-                    className="mb-4 inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors group"
+                    className="mb-4 inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors group active:scale-95 cursor-pointer"
                   >
                     <span className="text-2xl group-hover:-translate-x-0.5 transition-transform">←</span>
                     <span className="font-semibold text-sm">Back</span>
@@ -287,7 +287,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setCurrentSection('departments')}
-                      className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-blue-500/30 to-blue-600/30 text-blue-200 border border-blue-500/30 hover:from-blue-500/50 hover:to-blue-600/50 transition-all"
+                      className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-blue-500/30 to-blue-600/30 text-blue-200 border border-blue-500/30 hover:from-blue-500/50 hover:to-blue-600/50 transition-all cursor-pointer active:scale-95"
                     >
                       Departments
                     </button>
@@ -295,9 +295,12 @@ const Dashboard: React.FC = () => {
                     {currentSection !== 'departments' && selectedDepartment && (
                       <>
                         <div className="text-slate-500">/</div>
-                        <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-purple-500/30 to-purple-600/30 text-purple-200 border border-purple-500/30 truncate max-w-[150px]">
+                        <button
+                          onClick={() => setCurrentSection('departments')}
+                          className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-purple-500/30 to-purple-600/30 text-purple-200 border border-purple-500/30 hover:from-purple-500/50 hover:to-purple-600/50 transition-all cursor-pointer active:scale-95 truncate max-w-[150px]"
+                        >
                           {selectedDepartment.name}
-                        </span>
+                        </button>
                       </>
                     )}
                     
@@ -306,14 +309,20 @@ const Dashboard: React.FC = () => {
                         <div className="text-slate-500">/</div>
                         <button
                           onClick={() => loadCourses(selectedDepartment!.id)}
-                          className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-cyan-500/30 to-cyan-600/30 text-cyan-200 border border-cyan-500/30 hover:from-cyan-500/50 hover:to-cyan-600/50 transition-all"
+                          className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-cyan-500/30 to-cyan-600/30 text-cyan-200 border border-cyan-500/30 hover:from-cyan-500/50 hover:to-cyan-600/50 transition-all cursor-pointer active:scale-95"
                         >
                           Courses
                         </button>
                         <div className="text-slate-500">/</div>
-                        <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500/30 to-pink-600/30 text-pink-200 border border-pink-500/30 truncate max-w-[150px]">
+                        <button
+                          onClick={() => {
+                            setCurrentSection('courses');
+                            setSelectedCourse(null);
+                          }}
+                          className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500/30 to-pink-600/30 text-pink-200 border border-pink-500/30 hover:from-pink-500/50 hover:to-pink-600/50 transition-all cursor-pointer active:scale-95 truncate max-w-[150px]"
+                        >
                           {selectedCourse?.name}
-                        </span>
+                        </button>
                       </>
                     )}
                   </div>
