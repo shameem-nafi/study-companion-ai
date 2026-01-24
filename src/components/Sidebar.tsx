@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Building2,
-  RefreshCw,
+  BookOpen,
   LogOut,
   Menu,
   X,
@@ -36,6 +36,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onToggleChatbot }
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard.title'), icon: LayoutDashboard, route: '/dashboard' },
+    { id: 'departments', label: 'Departments', icon: BookOpen, route: '/dashboard' },
   ];
 
   const NavContent = () => (
