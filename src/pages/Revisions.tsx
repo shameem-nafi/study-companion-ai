@@ -24,12 +24,12 @@ const Revisions: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isDark } = useTheme();
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState('all');
 
   const handleToggleChatbot = () => {
-    chatbotRef.current?.open();
+    // Chatbot removed
   };
 
   const handleNavigate = (page: string) => {
@@ -408,9 +408,9 @@ const Revisions: React.FC = () => {
         </div>
       </main>
 
-      <AIChatbot ref={chatbotRef} />
     </div>
   );
 };
 
+export default Revisions;
 export default Revisions;
