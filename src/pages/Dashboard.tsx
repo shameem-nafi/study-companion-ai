@@ -265,7 +265,7 @@ const Dashboard: React.FC = () => {
             <>
               {/* Breadcrumb Navigation with Back Button - Smart Futuristic Design */}
               {currentSection !== 'departments' && currentSection !== 'search' && (
-                <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <Button
                     onClick={() => {
                       if (currentSection === 'courses') {
@@ -276,9 +276,10 @@ const Dashboard: React.FC = () => {
                         setSelectedCourse(null);
                       }
                     }}
-                    className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border border-slate-600 hover:border-slate-500 transition-all"
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all h-11 px-6 font-semibold text-base flex items-center gap-2 group"
                   >
-                    ← Back
+                    <span className="text-xl group-hover:-translate-x-1 transition-transform">←</span>
+                    <span>Back</span>
                   </Button>
                   
                   {/* Compact Breadcrumb Trail */}
