@@ -411,38 +411,47 @@ const Dashboard: React.FC = () => {
               {/* COURSES SECTION */}
               {currentSection === 'courses' && selectedDepartment && (
                 <div>
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h2 className="text-3xl font-bold text-white mb-2">{selectedDepartment.name}</h2>
-                      <p className="text-slate-400">Manage courses in this department</p>
-                    </div>
-                    <Dialog open={showCourseModal} onOpenChange={setShowCourseModal}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all">
-                          <Plus className="w-4 h-4 mr-2" /> New Course
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-slate-900 border-slate-700">
-                        <DialogHeader><DialogTitle className="text-white">Create Course</DialogTitle></DialogHeader>
-                        <div className="space-y-4">
-                          <Input
-                            placeholder="Course name"
-                            value={newCourseName}
-                            onChange={(e) => setNewCourseName(e.target.value)}
-                            className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                            onKeyPress={(e) => e.key === 'Enter' && addCourse()}
-                          />
-                          <Input
-                            placeholder="Course code (optional)"
-                            value={newCourseCode}
-                            onChange={(e) => setNewCourseCode(e.target.value)}
-                            className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                            onKeyPress={(e) => e.key === 'Enter' && addCourse()}
-                          />
-                          <Button onClick={addCourse} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">Add Course</Button>
+                  <div className="mb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gradient-to-br from-purple-500/30 to-pink-600/30 rounded-2xl border border-purple-500/20">
+                          <Code className="w-8 h-8 text-purple-300" />
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                        <div>
+                          <h2 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
+                            {selectedDepartment.name}
+                          </h2>
+                          <p className="text-slate-400 text-sm mt-1">Explore and manage your courses</p>
+                        </div>
+                      </div>
+                      <Dialog open={showCourseModal} onOpenChange={setShowCourseModal}>
+                        <DialogTrigger asChild>
+                          <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 shadow-lg hover:shadow-purple-500/50 transition-all h-11 px-6 font-semibold text-base">
+                            <Plus className="w-5 h-5 mr-2" /> New Course
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-slate-900 border-slate-700">
+                          <DialogHeader><DialogTitle className="text-white">Create Course</DialogTitle></DialogHeader>
+                          <div className="space-y-4">
+                            <Input
+                              placeholder="Course name"
+                              value={newCourseName}
+                              onChange={(e) => setNewCourseName(e.target.value)}
+                              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+                              onKeyPress={(e) => e.key === 'Enter' && addCourse()}
+                            />
+                            <Input
+                              placeholder="Course code (optional)"
+                              value={newCourseCode}
+                              onChange={(e) => setNewCourseCode(e.target.value)}
+                              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+                              onKeyPress={(e) => e.key === 'Enter' && addCourse()}
+                            />
+                            <Button onClick={addCourse} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">Add Course</Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
 
                   {courses.length === 0 ? (
@@ -498,17 +507,25 @@ const Dashboard: React.FC = () => {
               {/* TOPICS SECTION */}
               {currentSection === 'topics' && selectedCourse && (
                 <div>
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h2 className="text-3xl font-bold text-white mb-2">{selectedCourse.name}</h2>
-                      <p className="text-slate-400">Manage topics and resources</p>
-                    </div>
-                    <Dialog open={showTopicModal} onOpenChange={setShowTopicModal}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all">
-                          <Plus className="w-4 h-4 mr-2" /> New Topic
-                        </Button>
-                      </DialogTrigger>
+                  <div className="mb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gradient-to-br from-pink-500/30 to-red-600/30 rounded-2xl border border-pink-500/20">
+                          <Sparkles className="w-8 h-8 text-pink-300" />
+                        </div>
+                        <div>
+                          <h2 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-pink-400 via-red-400 to-yellow-400 bg-clip-text text-transparent">
+                            {selectedCourse.name}
+                          </h2>
+                          <p className="text-slate-400 text-sm mt-1">Master each topic and track your progress</p>
+                        </div>
+                      </div>
+                      <Dialog open={showTopicModal} onOpenChange={setShowTopicModal}>
+                        <DialogTrigger asChild>
+                          <Button className="bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 text-white border-0 shadow-lg hover:shadow-pink-500/50 transition-all h-11 px-6 font-semibold text-base">
+                            <Plus className="w-5 h-5 mr-2" /> New Topic
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent className="bg-slate-900 border-slate-700">
                         <DialogHeader><DialogTitle className="text-white">Create Topic</DialogTitle></DialogHeader>
                         <div className="space-y-4">
@@ -526,10 +543,11 @@ const Dashboard: React.FC = () => {
                             className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
                             onKeyPress={(e) => e.key === 'Enter' && addTopic()}
                           />
-                          <Button onClick={addTopic} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">Add Topic</Button>
+                          <Button onClick={addTopic} className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 text-white border-0">Add Topic</Button>
                         </div>
                       </DialogContent>
                     </Dialog>
+                    </div>
                   </div>
 
                   {topics.length === 0 ? (
