@@ -1,13 +1,13 @@
-# Study Companion AI - Your Personalized Study Organizer
+# Study Companion AI - Your Personal Study To-Do List
 
-Study Companion AI is an intelligent study organization platform that helps students manage their academic workload with AI-powered assistance. Track topics, courses, and revisions with spaced repetition scheduling.
+Study Companion AI is an intelligent to-do list application designed specifically for study management. Organize your study tasks, track progress, and get AI-powered assistance to help you stay on top of your academic goals.
 
 ## Features
 
-- 📚 **Hierarchical Organization**: Organize your studies into departments, courses, and topics
+- ✅ **Easy Task Management**: Create, organize, and manage your study tasks effortlessly
 - 🤖 **AI Study Assistant**: Chat with an AI-powered assistant for study help and explanations
-- ✅ **Progress Tracking**: Monitor completion status and revision schedules
-- 🔄 **Spaced Repetition**: Intelligent revision scheduling based on learning science principles
+- 📊 **Progress Tracking**: Monitor completion status and see your study progress
+- 🎯 **Priority-Based Organization**: Organize tasks by priority and subject
 - 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
 - 🌙 **Dark Mode**: Easy on the eyes with built-in dark mode support
 - 🌍 **Multi-language**: Support for English and Bengali

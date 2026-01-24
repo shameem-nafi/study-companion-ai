@@ -9,11 +9,6 @@ import "@/i18n";
 import Auth from "./pages/Auth";
 import CompleteProfile from "./pages/CompleteProfile";
 import Dashboard from "./pages/Dashboard";
-import Home from "./pages/Home";
-import Departments from "./pages/Departments";
-import Courses from "./pages/Courses";
-import Topics from "./pages/Topics";
-import Revisions from "./pages/Revisions";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -29,20 +24,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  if (user) return <Navigate to="/home" replace />;
+  if (user) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<PublicRoute><Auth /></PublicRoute>} />
-    <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
     <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-    <Route path="/departments" element={<ProtectedRoute><Departments /></ProtectedRoute>} />
-    <Route path="/courses/:departmentId" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
-    <Route path="/topics/:courseId" element={<ProtectedRoute><Topics /></ProtectedRoute>} />
-    <Route path="/revisions" element={<ProtectedRoute><Revisions /></ProtectedRoute>} />
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>

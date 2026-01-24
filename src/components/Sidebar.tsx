@@ -20,11 +20,10 @@ import { useState } from 'react';
 
 interface SidebarProps {
   currentPage: string;
-  onNavigate: (page: string) => void;
   onToggleChatbot?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onToggleChatbot }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onToggleChatbot }) => {
   const { t } = useTranslation();
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
@@ -37,8 +36,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
 
   const navItems = [
     { id: 'dashboard', label: t('dashboard.title'), icon: LayoutDashboard, route: '/dashboard' },
-    { id: 'departments', label: t('departments.title'), icon: Building2, route: '/departments' },
-    { id: 'revisions', label: t('revisions.title'), icon: RefreshCw, route: '/revisions' },
   ];
 
   const NavContent = () => (
@@ -47,7 +44,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
       <div className="p-6 border-b border-border/50 flex items-center justify-between gap-3">
         <button
           onClick={() => {
-            onNavigate('dashboard');
             setMobileOpen(false);
           }}
           className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer flex-1 min-w-0"
@@ -87,7 +83,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
             whileTap={{ scale: 0.96 }}
             onClick={() => {
               navigate(item.route);
-              onNavigate(item.id);
               setMobileOpen(false);
             }}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
@@ -150,7 +145,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, onTog
           </Button>
         </div>
         <button
-          onClick={() => onNavigate('dashboard')}
+          onClick={() => {
+            setMobileOpen(false);
+          }}
           className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
         >
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
