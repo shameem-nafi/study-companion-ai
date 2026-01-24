@@ -263,9 +263,9 @@ const Dashboard: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Breadcrumb Navigation with Back Button */}
+              {/* Breadcrumb Navigation with Back Button - Smart Futuristic Design */}
               {currentSection !== 'departments' && currentSection !== 'search' && (
-                <div className="flex items-center gap-4 mb-8">
+                <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <Button
                     onClick={() => {
                       if (currentSection === 'courses') {
@@ -276,37 +276,42 @@ const Dashboard: React.FC = () => {
                         setSelectedCourse(null);
                       }
                     }}
-                    variant="outline"
-                    className="bg-slate-800/50 border-slate-700 hover:bg-slate-700 text-white"
+                    className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white border border-slate-600 hover:border-slate-500 transition-all"
                   >
                     ← Back
                   </Button>
-                  <div className="flex items-center gap-2 text-sm px-4 py-3 bg-slate-800/30 rounded-lg border border-slate-700/30 backdrop-blur">
+                  
+                  {/* Compact Breadcrumb Trail */}
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => setCurrentSection('departments')}
-                      className="text-blue-400 hover:text-blue-300 font-medium transition"
+                      className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-blue-500/30 to-blue-600/30 text-blue-200 border border-blue-500/30 hover:from-blue-500/50 hover:to-blue-600/50 transition-all"
                     >
                       Departments
                     </button>
-                    {currentSection !== 'departments' && (
+                    
+                    {currentSection !== 'departments' && selectedDepartment && (
                       <>
-                        <ChevronRight className="w-4 h-4 text-slate-500" />
-                        {selectedDepartment && (
-                          <span className="text-slate-300 font-medium">{selectedDepartment.name}</span>
-                        )}
+                        <div className="text-slate-500">/</div>
+                        <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-purple-500/30 to-purple-600/30 text-purple-200 border border-purple-500/30 truncate max-w-[150px]">
+                          {selectedDepartment.name}
+                        </span>
                       </>
                     )}
-                    {currentSection === 'topics' && selectedCourse && (
+                    
+                    {currentSection === 'topics' && (
                       <>
-                        <ChevronRight className="w-4 h-4 text-slate-500" />
+                        <div className="text-slate-500">/</div>
                         <button
                           onClick={() => loadCourses(selectedDepartment!.id)}
-                          className="text-blue-400 hover:text-blue-300 font-medium transition"
+                          className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-cyan-500/30 to-cyan-600/30 text-cyan-200 border border-cyan-500/30 hover:from-cyan-500/50 hover:to-cyan-600/50 transition-all"
                         >
                           Courses
                         </button>
-                        <ChevronRight className="w-4 h-4 text-slate-500" />
-                        <span className="text-slate-300 font-medium">{selectedCourse.name}</span>
+                        <div className="text-slate-500">/</div>
+                        <span className="px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-gradient-to-r from-pink-500/30 to-pink-600/30 text-pink-200 border border-pink-500/30 truncate max-w-[150px]">
+                          {selectedCourse?.name}
+                        </span>
                       </>
                     )}
                   </div>
