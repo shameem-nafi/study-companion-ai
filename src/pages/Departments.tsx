@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Sidebar } from '@/components/Sidebar';
-import { AIChatbot, AIChatbotHandle } from '@/components/AIChatbot';
+
 import { AddDepartmentModal } from '@/components/AddDepartmentModal';
 import { StudyService, Department } from '@/services/studyService';
 
@@ -30,7 +30,7 @@ const Departments: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { isDark } = useTheme();
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ const Departments: React.FC = () => {
   };
 
   const handleToggleChatbot = () => {
-    chatbotRef.current?.open();
+    // Chatbot removed
   };
 
   const handleNavigate = (page: string) => {
@@ -337,7 +337,6 @@ const Departments: React.FC = () => {
         isLoading={isAddingDept}
       />
 
-      <AIChatbot ref={chatbotRef} />
     </div>
   );
 };

@@ -23,12 +23,12 @@ const Topics: React.FC = () => {
   const navigate = useNavigate();
   const { courseId } = useParams();
   const { isDark } = useTheme();
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
+  
   const [expandedTopic, setExpandedTopic] = useState<number | null>(null);
   const [completedLessons, setCompletedLessons] = useState<number[]>([]);
 
   const handleToggleChatbot = () => {
-    chatbotRef.current?.open();
+    // Chatbot removed
   };
 
   const handleNavigate = (page: string) => {
@@ -342,9 +342,9 @@ const Topics: React.FC = () => {
         </div>
       </main>
 
-      <AIChatbot ref={chatbotRef} />
     </div>
   );
 };
 
+export default Topics;
 export default Topics;

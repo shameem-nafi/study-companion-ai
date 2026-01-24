@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Sidebar } from '@/components/Sidebar';
-import { AIChatbot, AIChatbotHandle } from '@/components/AIChatbot';
+
 import { AddCourseModal } from '@/components/AddCourseModal';
 import { StudyService, Department, Course } from '@/services/studyService';
 
@@ -27,7 +27,7 @@ const Courses: React.FC = () => {
   const { departmentId } = useParams();
   const { user } = useAuth();
   const { isDark } = useTheme();
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
+  
   
   const [searchQuery, setSearchQuery] = useState('');
   const [department, setDepartment] = useState<Department | null>(null);
@@ -99,7 +99,7 @@ const Courses: React.FC = () => {
   };
 
   const handleToggleChatbot = () => {
-    chatbotRef.current?.open();
+    // Chatbot removed
   };
 
   const handleNavigate = (page: string) => {
@@ -364,7 +364,6 @@ const Courses: React.FC = () => {
         isLoading={isAddingCourse}
       />
 
-      <AIChatbot ref={chatbotRef} />
     </div>
   );
 };
