@@ -1,16 +1,36 @@
-# Study Companion AI - Your Personal Study To-Do List
+# Study Companion AI - Your Personalized Study Organizer
 
-Study Companion AI is an intelligent to-do list application designed specifically for study management. Organize your study tasks, track progress, and get AI-powered assistance to help you stay on top of your academic goals.
+Study Companion AI is an intelligent study organization platform that helps students manage their academic workload with AI-powered assistance. Organize your studies into departments, courses, and topics with built-in revision tracking and global search capabilities.
 
-## Features
+## Core Features
 
-- ✅ **Easy Task Management**: Create, organize, and manage your study tasks effortlessly
-- 🤖 **AI Study Assistant**: Chat with an AI-powered assistant for study help and explanations
-- 📊 **Progress Tracking**: Monitor completion status and see your study progress
-- 🎯 **Priority-Based Organization**: Organize tasks by priority and subject
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
-- 🌙 **Dark Mode**: Easy on the eyes with built-in dark mode support
-- 🌍 **Multi-language**: Support for English and Bengali
+### 1. Hierarchical Content Management
+- **Departments**: Top-level categories (e.g., Computer Science, Mathematics)
+- **Courses**: Belong to departments with optional course codes
+- **Topics**: Include name, description, tags, and completion status
+- **Resources**: Attach PDFs, links, notes, and YouTube videos to topics
+
+### 2. Section-Based Dashboard UI
+- Clean, organized interface with separate sections for each level
+- Smart navigation: Select Department → View Courses → View Topics
+- Strong visual hierarchy with breadcrumb navigation
+- No cluttered nested layouts - everything is clearly structured
+
+### 3. Global Search Bar
+- Search by course or topic name
+- Results display full hierarchy (Department → Course → Topic)
+- Direct navigation to search results
+
+### 4. Revision Tracking
+- Displays revision status as readable text (e.g., "Revised 1 time", "2 revisions")
+- Track revision count and last revision date per topic
+- Clear text-based display without intrusive buttons
+
+### 5. AI Study Assistant
+- In-page chatbot accessible from all sections
+- Provides study schedule suggestions and revision recommendations
+- Respects your language preference (English/Bengali)
+- Markdown-formatted responses for better readability
 
 ## Getting Started
 
