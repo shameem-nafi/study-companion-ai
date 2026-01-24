@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { DeveloperCredit } from '@/components/DeveloperCredit';
-import { AIChatbot, AIChatbotHandle } from '@/components/AIChatbot';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -14,7 +13,6 @@ import { StudyService, Department, Course, Topic } from '@/services/studyService
 type Section = 'departments' | 'courses' | 'topics' | 'search';
 
 const Dashboard: React.FC = () => {
-  const chatbotRef = React.useRef<AIChatbotHandle>(null);
   const { user } = useAuth();
   
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -202,10 +200,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleToggleChatbot = () => {
-    chatbotRef.current?.open();
-  };
-
   const getRevisionText = (count: number) => {
     if (count === 0) return 'Not revised';
     if (count === 1) return 'Revised 1 time';
@@ -220,7 +214,7 @@ const Dashboard: React.FC = () => {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <Sidebar currentPage="dashboard" onToggleChatbot={handleToggleChatbot} />
+      <Sidebar currentPage="dashboard" />
       <main className="lg:ml-64 min-h-screen pt-20 lg:pt-0 relative z-10">
         <div className="p-6 lg:p-8 max-w-6xl mx-auto">
           {/* Premium Header */}
@@ -808,7 +802,6 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </main>
-      <AIChatbot ref={chatbotRef} courses={courses} topics={topics} />
 
       <style>{`
         @keyframes slideIn {
