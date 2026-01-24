@@ -321,28 +321,42 @@ const Dashboard: React.FC = () => {
               {/* DEPARTMENTS SECTION */}
               {currentSection === 'departments' && (
                 <div>
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-white">Departments</h2>
-                    <Dialog open={showDeptModal} onOpenChange={setShowDeptModal}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all">
-                          <Plus className="w-4 h-4 mr-2" /> New Department
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-slate-900 border-slate-700">
-                        <DialogHeader><DialogTitle className="text-white">Create Department</DialogTitle></DialogHeader>
-                        <div className="space-y-4">
-                          <Input
-                            placeholder="Department name (e.g., Computer Science)"
-                            value={newDeptName}
-                            onChange={(e) => setNewDeptName(e.target.value)}
-                            className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                            onKeyPress={(e) => e.key === 'Enter' && addDepartment()}
-                          />
-                          <Button onClick={addDepartment} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">Add Department</Button>
+                  {/* Premium Section Header */}
+                  <div className="mb-10">
+                    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-500/30 to-purple-600/30 rounded-2xl border border-blue-500/20">
+                          <BookOpen className="w-8 h-8 text-blue-300" />
                         </div>
-                      </DialogContent>
-                    </Dialog>
+                        <div>
+                          <h2 className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                            Departments
+                          </h2>
+                          <p className="text-slate-400 text-sm mt-1">Organize your learning by subjects</p>
+                        </div>
+                      </div>
+                      
+                      <Dialog open={showDeptModal} onOpenChange={setShowDeptModal}>
+                        <DialogTrigger asChild>
+                          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-blue-500/50 transition-all h-11 px-6 font-semibold text-base">
+                            <Plus className="w-5 h-5 mr-2" /> New Department
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-slate-900 border-slate-700">
+                          <DialogHeader><DialogTitle className="text-white">Create Department</DialogTitle></DialogHeader>
+                          <div className="space-y-4">
+                            <Input
+                              placeholder="Department name (e.g., Computer Science)"
+                              value={newDeptName}
+                              onChange={(e) => setNewDeptName(e.target.value)}
+                              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
+                              onKeyPress={(e) => e.key === 'Enter' && addDepartment()}
+                            />
+                            <Button onClick={addDepartment} className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0">Add Department</Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                   </div>
 
                   {departments.length === 0 ? (
