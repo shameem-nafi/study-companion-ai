@@ -12,6 +12,7 @@ import {
   GraduationCap,
   MessageCircle,
   User,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { GlobalSettings } from '@/components/GlobalSettings';
@@ -62,13 +63,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onToggleChatbot }
           </div>
         </button>
         <Button
-          variant="ghost"
-          size="icon"
           onClick={onToggleChatbot}
-          className="hidden lg:flex bg-primary hover:bg-primary/80 text-primary-foreground rounded-xl h-9 w-9 flex-shrink-0"
-          title={t('chatbot.title')}
+          className="hidden lg:flex bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0 shadow-lg hover:shadow-pink-500/50 transition-all h-10 px-4 font-semibold text-sm items-center gap-2 flex-shrink-0 rounded-xl group"
+          title="AI Study Assistant"
         >
-          <MessageCircle className="w-5 h-5" />
+          <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+          <span className="hidden sm:inline">Ask AI</span>
         </Button>
       </div>
 

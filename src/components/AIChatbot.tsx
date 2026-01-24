@@ -17,10 +17,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { Course, Topic } from '@/services/studyService';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+}
+
+interface AIChatbotProps {
+  courses?: Course[];
+  topics?: Topic[];
 }
 
 export interface AIChatbotHandle {
@@ -29,15 +35,16 @@ export interface AIChatbotHandle {
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/study-chat`;
 
-export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
-  const { t, i18n } = useTranslation();
-  const { toast } = useToast();
-  const { profile } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
+  ({ courses = [], topics = [] }, ref) => {
+    const { t, i18n } = useTranslation();
+    const { toast } = useToast();
+    const { profile } = useAuth();
+    const [isOpen, setIsOpen] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(false);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +73,17 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
     let assistantContent = '';
 
     try {
+      // Build context about user's courses and topics
+      const courseContext = courses.length > 0 
+        ? `User is currently studying these courses: ${courses.map(c => `${c.name}${c.code ? ` (${c.code})` : ''}`).join(', ')}`
+        : '';
+      
+      const topicContext = topics.length > 0
+        ? `User has ${topics.length} topics: ${topics.map(t => t.name).join(', ')}`
+        : '';
+      
+      const contextMessage = [courseContext, topicContext].filter(Boolean).join('. ');
+
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
@@ -75,6 +93,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
         body: JSON.stringify({
           messages: newMessages,
           language: i18n.language,
+          context: contextMessage,
         }),
       });
 
@@ -147,17 +166,32 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
     streamChat(input.trim());
   };
 
-  const quickPrompts = i18n.language === 'bn'
-    ? [
-        'আজ আমার কী রিভিশন করা উচিত?',
+  const quickPrompts = React.useMemo(() => {
+    const courseNames = courses.map(c => c.name).slice(0, 2).join(', ');
+    const topicCount = topics.length;
+    
+    if (i18n.language === 'bn') {
+      return [
+        courseNames 
+          ? `${courseNames} এর জন্য আজ আমার কী রিভিশন করা উচিত?`
+          : 'আজ আমার কী রিভিশন করা উচিত?',
         'আমার পড়াশোনার সময়সূচী তৈরি করো',
-        'পরীক্ষার প্রস্তুতির টিপস দাও',
-      ]
-    : [
-        'What should I revise today?',
-        'Create a study schedule for me',
-        'Give me exam preparation tips',
+        topicCount > 0 
+          ? `আমার ${topicCount}টি টপিক আছে, কীভাবে শিখব?`
+          : 'পরীক্ষার প্রস্তুতির টিপস দাও',
       ];
+    } else {
+      return [
+        courseNames
+          ? `What should I revise today in ${courseNames}?`
+          : 'What should I revise today?',
+        'Create a study schedule for me',
+        topicCount > 0
+          ? `I have ${topicCount} topics to cover, how should I learn?`
+          : 'Give me exam preparation tips',
+      ];
+    }
+  }, [courses, topics, i18n.language]);
 
   return (
     <>
@@ -174,10 +208,10 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
             }}
             exit={{ opacity: 0, y: 100, scale: 0.85, rotate: -5 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 right-6 w-[360px] max-w-[calc(100vw-48px)] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden z-50 flex flex-col"
+            className="fixed bottom-6 right-6 w-[360px] max-w-[calc(100vw-48px)] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 border border-purple-500/20 rounded-2xl shadow-2xl hover:shadow-purple-500/20 overflow-hidden z-50 flex flex-col transition-all duration-300"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-primary to-primary/80 p-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
@@ -214,23 +248,23 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
             {/* Chat Content */}
             {!isMinimized && (
               <>
-                <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+                <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-slate-900 to-slate-950" ref={scrollRef}>
                   {messages.length === 0 ? (
                     <div className="text-center py-8">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                        <Bot className="w-8 h-8 text-primary" />
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                        <Sparkles className="w-8 h-8 text-purple-400" />
                       </div>
-                      <h4 className="font-semibold mb-2">
+                      <h4 className="font-semibold mb-2 text-white">
                         {i18n.language === 'bn'
                           ? `হাই ${profile?.full_name || ''}! 👋`
                           : `Hi ${profile?.full_name || ''}! 👋`}
                       </h4>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className="text-sm text-slate-400 mb-6">
                         {i18n.language === 'bn'
                           ? 'আমি আপনার পড়াশোনায় সাহায্য করতে এখানে আছি'
                           : "I'm here to help with your studies"}
                       </p>
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         {quickPrompts.map((prompt, i) => (
                           <motion.button
                             key={i}
@@ -241,7 +275,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
                             whileTap={{ scale: 0.96 }}
                             onClick={() => streamChat(prompt)}
                             disabled={isLoading}
-                            className="w-full text-left p-3 rounded-xl bg-muted hover:bg-accent text-sm transition-colors disabled:opacity-50"
+                            className="w-full text-left p-3 rounded-xl bg-gradient-to-r from-slate-800 to-slate-800/50 hover:from-purple-500/20 hover:to-pink-500/20 text-slate-200 text-sm transition-all duration-300 border border-slate-700/50 hover:border-purple-500/50 disabled:opacity-50"
                           >
                             {prompt}
                           </motion.button>
@@ -275,8 +309,8 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
                           <div
                             className={`flex-1 p-3 rounded-xl text-sm max-w-[280px] overflow-hidden ${
                               msg.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted'
+                                ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
+                                : 'bg-slate-800 text-slate-100 border border-slate-700'
                             }`}
                           >
                             {msg.content ? (
@@ -299,7 +333,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
                 </ScrollArea>
 
                 {/* Input */}
-                <form onSubmit={handleSubmit} className="p-4 border-t border-border">
+                <form onSubmit={handleSubmit} className="p-4 border-t border-slate-700/50 bg-slate-950">
                   <div className="flex gap-2">
                     <Input
                       ref={inputRef}
@@ -309,9 +343,14 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle>((_, ref) => {
                         i18n.language === 'bn' ? 'আপনার প্রশ্ন লিখুন...' : 'Ask me anything...'
                       }
                       disabled={isLoading}
-                      className="flex-1"
+                      className="flex-1 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                     />
-                    <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+                    <Button 
+                      type="submit" 
+                      size="icon" 
+                      disabled={isLoading || !input.trim()}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white"
+                    >
                       {isLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (

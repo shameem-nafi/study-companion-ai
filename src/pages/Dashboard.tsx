@@ -786,7 +786,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </main>
-      <AIChatbot ref={chatbotRef} />
+      <AIChatbot ref={chatbotRef} courses={courses} topics={topics} />
 
       <style>{`
         @keyframes slideIn {
