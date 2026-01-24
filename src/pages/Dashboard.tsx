@@ -430,24 +430,38 @@ const Dashboard: React.FC = () => {
                             <Plus className="w-5 h-5 mr-2" /> New Course
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="bg-slate-900 border-slate-700">
-                          <DialogHeader><DialogTitle className="text-white">Create Course</DialogTitle></DialogHeader>
-                          <div className="space-y-4">
-                            <Input
-                              placeholder="Course name"
-                              value={newCourseName}
-                              onChange={(e) => setNewCourseName(e.target.value)}
-                              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                              onKeyPress={(e) => e.key === 'Enter' && addCourse()}
-                            />
-                            <Input
-                              placeholder="Course code (optional)"
-                              value={newCourseCode}
-                              onChange={(e) => setNewCourseCode(e.target.value)}
-                              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                              onKeyPress={(e) => e.key === 'Enter' && addCourse()}
-                            />
-                            <Button onClick={addCourse} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0">Add Course</Button>
+                        <DialogContent className="bg-gradient-to-b from-slate-900 to-slate-950 border-slate-700 shadow-2xl">
+                          <DialogHeader>
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="p-2 bg-gradient-to-br from-purple-500/30 to-pink-600/30 rounded-lg border border-purple-500/20">
+                                <Code className="w-5 h-5 text-purple-300" />
+                              </div>
+                              <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Create Course</DialogTitle>
+                            </div>
+                            <p className="text-slate-400 text-sm">Add a new course to organize your learning</p>
+                          </DialogHeader>
+                          <div className="space-y-4 mt-6">
+                            <div>
+                              <label className="text-sm font-semibold text-slate-300 mb-2 block">Course Name</label>
+                              <Input
+                                placeholder="e.g., Web Development"
+                                value={newCourseName}
+                                onChange={(e) => setNewCourseName(e.target.value)}
+                                className="bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-purple-500/50 focus:ring-purple-500/20"
+                                onKeyPress={(e) => e.key === 'Enter' && addCourse()}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-semibold text-slate-300 mb-2 block">Course Code (Optional)</label>
+                              <Input
+                                placeholder="e.g., CS101"
+                                value={newCourseCode}
+                                onChange={(e) => setNewCourseCode(e.target.value)}
+                                className="bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-purple-500/50 focus:ring-purple-500/20"
+                                onKeyPress={(e) => e.key === 'Enter' && addCourse()}
+                              />
+                            </div>
+                            <Button onClick={addCourse} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0 h-11 font-semibold mt-6">Create Course</Button>
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -463,20 +477,21 @@ const Dashboard: React.FC = () => {
                       <p className="text-slate-500 text-sm">Add your first course to get started</p>
                     </div>
                   ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {courses.map((course, idx) => (
                         <div
                           key={course.id}
                           onClick={() => loadTopics(course.id)}
-                          className="group cursor-pointer"
+                          className="group cursor-pointer h-full"
                           style={{ animation: `slideIn 0.5s ease-out ${idx * 0.1}s both` }}
                         >
-                          <div className="relative h-full overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 p-6 hover:shadow-xl hover:shadow-purple-500/20">
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div className="relative z-10">
-                              <div className="flex items-start justify-between mb-4">
-                                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg">
-                                  <Code className="w-6 h-6 text-purple-400" />
+                          <div className="relative h-full overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/80 via-slate-900 to-slate-950 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 p-6 hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1">
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-purple-600/0 via-transparent to-transparent group-hover:from-purple-600/5 transition-all duration-300"></div>
+                            <div className="relative z-10 flex flex-col h-full">
+                              <div className="flex items-start justify-between mb-6">
+                                <div className="p-3 bg-gradient-to-br from-purple-500/40 to-pink-500/40 rounded-xl border border-purple-500/30 group-hover:border-purple-500/50 transition-all">
+                                  <Code className="w-6 h-6 text-purple-300 group-hover:text-purple-200 transition" />
                                 </div>
                                 <Button
                                   variant="ghost"
@@ -485,16 +500,23 @@ const Dashboard: React.FC = () => {
                                     e.stopPropagation();
                                     deleteCourse(course.id);
                                   }}
-                                  className="text-slate-500 hover:text-red-400 hover:bg-red-500/10"
+                                  className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
-                              <h3 className="text-xl font-bold text-white mb-1 group-hover:text-purple-300 transition">{course.name}</h3>
-                              {course.code && <p className="text-slate-400 text-sm mb-3">{course.code}</p>}
-                              <p className="text-slate-400 text-sm flex items-center gap-2 group-hover:text-slate-300 transition">
-                                View topics <ChevronRight className="w-4 h-4" />
-                              </p>
+                              <div className="flex-1">
+                                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-purple-300 transition line-clamp-2">{course.name}</h3>
+                                {course.code && (
+                                  <p className="text-sm font-semibold text-purple-300/60 mb-4 group-hover:text-purple-300/100 transition">
+                                    {course.code}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 pt-4 border-t border-slate-700/30 group-hover:border-purple-500/30 transition text-slate-400 group-hover:text-slate-300">
+                                <span className="text-sm font-semibold flex-1">Explore Topics</span>
+                                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -526,24 +548,38 @@ const Dashboard: React.FC = () => {
                             <Plus className="w-5 h-5 mr-2" /> New Topic
                           </Button>
                         </DialogTrigger>
-                      <DialogContent className="bg-slate-900 border-slate-700">
-                        <DialogHeader><DialogTitle className="text-white">Create Topic</DialogTitle></DialogHeader>
-                        <div className="space-y-4">
-                          <Input
-                            placeholder="Topic name"
-                            value={newTopicName}
-                            onChange={(e) => setNewTopicName(e.target.value)}
-                            className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                            onKeyPress={(e) => e.key === 'Enter' && addTopic()}
-                          />
-                          <Input
-                            placeholder="Description (optional)"
-                            value={newTopicDesc}
-                            onChange={(e) => setNewTopicDesc(e.target.value)}
-                            className="bg-slate-800 border-slate-700 text-white placeholder-slate-500"
-                            onKeyPress={(e) => e.key === 'Enter' && addTopic()}
-                          />
-                          <Button onClick={addTopic} className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 text-white border-0">Add Topic</Button>
+                      <DialogContent className="bg-gradient-to-b from-slate-900 to-slate-950 border-slate-700 shadow-2xl">
+                        <DialogHeader>
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="p-2 bg-gradient-to-br from-pink-500/30 to-red-600/30 rounded-lg border border-pink-500/20">
+                              <Sparkles className="w-5 h-5 text-pink-300" />
+                            </div>
+                            <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent">Create Topic</DialogTitle>
+                          </div>
+                          <p className="text-slate-400 text-sm">Break down your course into manageable topics</p>
+                        </DialogHeader>
+                        <div className="space-y-4 mt-6">
+                          <div>
+                            <label className="text-sm font-semibold text-slate-300 mb-2 block">Topic Name</label>
+                            <Input
+                              placeholder="e.g., React Hooks"
+                              value={newTopicName}
+                              onChange={(e) => setNewTopicName(e.target.value)}
+                              className="bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-pink-500/50 focus:ring-pink-500/20"
+                              onKeyPress={(e) => e.key === 'Enter' && addTopic()}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-semibold text-slate-300 mb-2 block">Description (Optional)</label>
+                            <Input
+                              placeholder="e.g., Learn about useState and useEffect"
+                              value={newTopicDesc}
+                              onChange={(e) => setNewTopicDesc(e.target.value)}
+                              className="bg-slate-800/50 border-slate-700 text-white placeholder-slate-500 focus:border-pink-500/50 focus:ring-pink-500/20"
+                              onKeyPress={(e) => e.key === 'Enter' && addTopic()}
+                            />
+                          </div>
+                          <Button onClick={addTopic} className="w-full bg-gradient-to-r from-pink-600 to-red-600 hover:from-pink-700 hover:to-red-700 text-white border-0 h-11 font-semibold mt-6">Create Topic</Button>
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -559,7 +595,7 @@ const Dashboard: React.FC = () => {
                       <p className="text-slate-500 text-sm">Create your first topic to start learning</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       {topics.map((topic, idx) => (
                         <div
                           key={topic.id}
@@ -567,19 +603,20 @@ const Dashboard: React.FC = () => {
                         >
                           <div className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 p-6 ${
                             topic.completed
-                              ? 'bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/30'
-                              : 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700/50 hover:border-pink-500/50'
-                          } hover:shadow-lg hover:shadow-pink-500/10`}>
+                              ? 'bg-gradient-to-br from-slate-800/40 via-slate-900/40 to-slate-950/60 border-slate-700/20 hover:border-slate-600/30'
+                              : 'bg-gradient-to-br from-slate-800/80 via-slate-900 to-slate-950 border-slate-700/50 hover:border-pink-500/50'
+                          } hover:shadow-xl transition-all duration-300 ${topic.completed ? '' : 'hover:-translate-y-0.5 hover:shadow-pink-500/20'}`}>
                             <div className={`absolute inset-0 bg-gradient-to-br transition-opacity duration-300 ${
                               topic.completed
                                 ? 'from-transparent to-transparent'
-                                : 'from-pink-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100'
+                                : 'from-pink-500/10 to-red-500/5 opacity-0 group-hover:opacity-100'
                             }`}></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-pink-600/0 via-transparent to-transparent group-hover:from-pink-600/5 transition-all duration-300"></div>
                             
                             <div className="relative z-10">
                               <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1">
-                                  <h3 className={`text-xl font-bold mb-2 transition ${
+                                  <h3 className={`text-2xl font-bold mb-2 transition ${
                                     topic.completed
                                       ? 'text-slate-500 line-through'
                                       : 'text-white group-hover:text-pink-300'
@@ -587,7 +624,7 @@ const Dashboard: React.FC = () => {
                                     {topic.name}
                                   </h3>
                                   {topic.description && (
-                                    <p className={`text-sm mb-4 ${topic.completed ? 'text-slate-600' : 'text-slate-400'}`}>
+                                    <p className={`text-sm mb-4 leading-relaxed ${topic.completed ? 'text-slate-600' : 'text-slate-400 group-hover:text-slate-300 transition'}`}>
                                       {topic.description}
                                     </p>
                                   )}
@@ -596,20 +633,20 @@ const Dashboard: React.FC = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => deleteTopic(topic.id)}
-                                  className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0"
+                                  className="text-slate-500 hover:text-red-400 hover:bg-red-500/10 flex-shrink-0 transition-all"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>
-                              <div className="flex items-center justify-between flex-wrap gap-4 pt-4 border-t border-slate-700/30">
+                              <div className="flex items-center justify-between flex-wrap gap-4 pt-5 border-t border-slate-700/30 group-hover:border-pink-500/20 transition">
                                 <div className="flex items-center gap-3 flex-wrap">
-                                  <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
                                     topic.completed
-                                      ? 'bg-slate-700/30'
-                                      : 'bg-slate-700/50 group-hover:bg-slate-600/50'
+                                      ? 'bg-slate-700/20 text-slate-500'
+                                      : 'bg-slate-700/40 group-hover:bg-slate-600/50 text-slate-300 group-hover:text-slate-200'
                                   }`}>
-                                    <Clock className="w-4 h-4 text-slate-400" />
-                                    <span className={`text-sm font-medium ${topic.completed ? 'text-slate-500' : 'text-slate-300'}`}>
+                                    <Clock className="w-4 h-4" />
+                                    <span className="text-sm">
                                       {getRevisionText(topic.revision_count)}
                                     </span>
                                   </div>
