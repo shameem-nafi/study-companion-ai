@@ -65,9 +65,11 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
   }, [isOpen, isMinimized]);
 
   const streamChat = async (userMessage: string) => {
+    console.log('streamChat called with message:', userMessage);
     setIsLoading(true);
     const newMessages: Message[] = [...messages, { role: 'user', content: userMessage }];
     setMessages(newMessages);
+    console.log('Messages updated:', newMessages);
     setInput('');
 
     let assistantContent = '';
@@ -83,6 +85,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
         : '';
       
       const contextMessage = [courseContext, topicContext].filter(Boolean).join('. ');
+      console.log('Sending to API with context:', contextMessage);
 
       const resp = await fetch(CHAT_URL, {
         method: 'POST',
@@ -162,7 +165,11 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading) {
+      console.log('Submit blocked - input:', input, 'isLoading:', isLoading);
+      return;
+    }
+    console.log('Submitting message:', input.trim());
     streamChat(input.trim());
   };
 
@@ -195,27 +202,52 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
 
   return (
     <>
+      {/* Floating Chat Button (for when chat is closed) */}
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              console.log('Floating chat button clicked - opening chatbot');
+              setIsOpen(true);
+            }}
+            className="fixed bottom-8 right-8 lg:bottom-24 lg:right-24 w-14 h-14 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:shadow-2xl hover:shadow-purple-500/50 shadow-lg flex items-center justify-center text-white z-40 transition-all duration-300"
+            title="Open AI Study Assistant"
+          >
+            <MessageCircle className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.85, rotate: 5 }}
+            initial={{ opacity: 0, y: 100, scale: 0.85 }}
             animate={{
               opacity: 1,
               y: 0,
               scale: 1,
               height: isMinimized ? 'auto' : '500px',
             }}
-            exit={{ opacity: 0, y: 100, scale: 0.85, rotate: -5 }}
+            exit={{ opacity: 0, y: 100, scale: 0.85 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-6 right-6 w-[360px] max-w-[calc(100vw-48px)] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 border border-purple-500/20 rounded-2xl shadow-2xl hover:shadow-purple-500/20 overflow-hidden z-50 flex flex-col transition-all duration-300"
+            className="fixed inset-4 lg:inset-auto lg:bottom-8 lg:right-8 lg:w-[420px] max-w-[calc(100vw-32px)] h-[calc(100vh-32px)] lg:h-[600px] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-950 border border-purple-500/20 rounded-2xl shadow-2xl hover:shadow-purple-500/20 overflow-hidden z-50 flex flex-col transition-all duration-300"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 p-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 p-5 lg:p-6 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <motion.div 
+                  className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
                   <Sparkles className="w-5 h-5 text-white" />
-                </div>
+                </motion.div>
                 <div className="text-white">
                   <h3 className="font-semibold">
                     {i18n.language === 'bn' ? 'AI স্টাডি সহায়ক' : 'AI Study Assistant'}
@@ -229,7 +261,10 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsMinimized(!isMinimized)}
+                  onClick={() => {
+                    console.log('Minimize button clicked');
+                    setIsMinimized(!isMinimized);
+                  }}
                   className="text-white hover:bg-white/20"
                 >
                   <Minimize2 className="w-4 h-4" />
@@ -237,7 +272,10 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    console.log('Close button clicked');
+                    setIsOpen(false);
+                  }}
                   className="text-white hover:bg-white/20"
                 >
                   <X className="w-4 h-4" />
@@ -248,23 +286,23 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
             {/* Chat Content */}
             {!isMinimized && (
               <>
-                <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-slate-900 to-slate-950" ref={scrollRef}>
+                <ScrollArea className="flex-1 p-5 lg:p-6 bg-gradient-to-b from-slate-900 to-slate-950 overflow-hidden" ref={scrollRef}>
                   {messages.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
+                    <div className="text-center py-8 px-4 flex flex-col items-center justify-center h-full">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-6 animate-pulse">
                         <Sparkles className="w-8 h-8 text-purple-400" />
                       </div>
-                      <h4 className="font-semibold mb-2 text-white">
+                      <h4 className="font-bold text-lg mb-3 text-white max-w-xs">
                         {i18n.language === 'bn'
-                          ? `হাই ${profile?.full_name || ''}! 👋`
-                          : `Hi ${profile?.full_name || ''}! 👋`}
+                          ? `হাই ${profile?.full_name || 'স্টুডেন্ট'}! 👋`
+                          : `Hi ${profile?.full_name || 'Student'}! 👋`}
                       </h4>
-                      <p className="text-sm text-slate-400 mb-6">
+                      <p className="text-sm text-slate-400 mb-8 max-w-xs leading-relaxed">
                         {i18n.language === 'bn'
                           ? 'আমি আপনার পড়াশোনায় সাহায্য করতে এখানে আছি'
                           : "I'm here to help with your studies"}
                       </p>
-                      <div className="space-y-3">
+                      <div className="space-y-3 w-full">
                         {quickPrompts.map((prompt, i) => (
                           <motion.button
                             key={i}
@@ -273,9 +311,12 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
                             transition={{ delay: i * 0.1, type: 'spring', damping: 20, stiffness: 300 }}
                             whileHover={{ scale: 1.02, x: 4 }}
                             whileTap={{ scale: 0.96 }}
-                            onClick={() => streamChat(prompt)}
+                            onClick={() => {
+                              console.log('Quick prompt clicked:', prompt);
+                              streamChat(prompt);
+                            }}
                             disabled={isLoading}
-                            className="w-full text-left p-3 rounded-xl bg-gradient-to-r from-slate-800 to-slate-800/50 hover:from-purple-500/20 hover:to-pink-500/20 text-slate-200 text-sm transition-all duration-300 border border-slate-700/50 hover:border-purple-500/50 disabled:opacity-50"
+                            className="w-full text-left p-4 rounded-xl bg-gradient-to-r from-slate-800/80 to-slate-800/40 hover:from-purple-500/30 hover:to-pink-500/30 text-slate-200 text-sm transition-all duration-300 border border-slate-700/50 hover:border-purple-500/50 disabled:opacity-50 cursor-pointer hover:shadow-lg hover:text-white active:scale-95"
                           >
                             {prompt}
                           </motion.button>
@@ -283,7 +324,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex flex-col">
                       {messages.map((msg, i) => (
                         <motion.div
                           key={i}
@@ -307,7 +348,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
                             )}
                           </div>
                           <div
-                            className={`flex-1 p-3 rounded-xl text-sm max-w-[280px] overflow-hidden ${
+                            className={`flex-1 p-4 rounded-xl text-sm max-w-xs overflow-auto ${
                               msg.role === 'user'
                                 ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white'
                                 : 'bg-slate-800 text-slate-100 border border-slate-700'
@@ -333,7 +374,7 @@ export const AIChatbot = React.forwardRef<AIChatbotHandle, AIChatbotProps>(
                 </ScrollArea>
 
                 {/* Input */}
-                <form onSubmit={handleSubmit} className="p-4 border-t border-slate-700/50 bg-slate-950">
+                <form onSubmit={handleSubmit} className="p-5 lg:p-6 border-t border-slate-700/50 bg-slate-950 flex-shrink-0">
                   <div className="flex gap-2">
                     <Input
                       ref={inputRef}

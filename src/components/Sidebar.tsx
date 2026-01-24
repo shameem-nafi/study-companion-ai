@@ -63,8 +63,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onToggleChatbot }
           </div>
         </button>
         <Button
-          onClick={onToggleChatbot}
-          className="hidden lg:flex bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0 shadow-lg hover:shadow-pink-500/50 transition-all h-10 px-4 font-semibold text-sm items-center gap-2 flex-shrink-0 rounded-xl group"
+          onClick={() => {
+            console.log('AI Chatbot button clicked');
+            onToggleChatbot?.();
+          }}
+          className="hidden lg:flex bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white border-0 shadow-lg hover:shadow-pink-500/50 transition-all duration-300 h-10 px-4 font-semibold text-sm items-center gap-2 flex-shrink-0 rounded-xl group active:scale-95"
           title="AI Study Assistant"
         >
           <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
@@ -138,8 +141,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onToggleChatbot }
           <Button
             variant="ghost"
             size="sm"
-            onClick={onToggleChatbot}
-            className="bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg gap-2"
+            onClick={() => {
+              console.log('Mobile AI Chatbot button clicked');
+              onToggleChatbot?.();
+            }}
+            className="bg-primary hover:bg-primary/80 text-primary-foreground rounded-lg gap-2 active:scale-95 transition-transform duration-200"
           >
             <MessageCircle className="w-4 h-4" />
             <span className="text-sm">{t('chatbot.title')}</span>
